@@ -6,6 +6,7 @@ REPO_URL="${REPO_URL:-https://github.com/WIZnet-ioNIC/W55RP20-S2E.git}"
 REPO_REF="${REPO_REF:-main}"          # tag/commit도 가능
 SRC_DIR="${SRC_DIR:-/work/src}"       # 여기에 소스가 있어야 빌드
 OUT_DIR="${OUT_DIR:-/work/out}"       # 산출물 복사 위치
+BUILD_DIR="${BUILD_DIR:-build}"     # 빌드 디렉토리(기본: build)
 PICO_SDK_TAG="${PICO_SDK_TAG:-2.2.0}" # 레포 내부 submodule pico-sdk를 강제할 태그
 
 # ---- Helpers ----
@@ -20,6 +21,20 @@ is_mountpoint() {
 log() { echo "[INFO] $*"; }
 warn() { echo "[WARN] $*" >&2; }
 err() { echo "[ERROR] $*" >&2; }
+
+need() { command -v "$1" >/dev/null 2>&1 || { err "Missing tool: $1"; exit 2; }; }
+
+# ---- Tool preflight (fail-fast) ----
+need git
+need cmake
+need ninja
+need python
+need python3
+need arm-none-eabi-gcc
+need arm-none-eabi-objcopy
+need picotool
+need astyle
+need srec_cat
 
 mkdir -p "$SRC_DIR" "$OUT_DIR"
 
@@ -98,21 +113,27 @@ fi
 
 # ---- Build ----
 log "Configuring (Ninja) ..."
-rm -rf build
-cmake -S . -B build -G Ninja \
+log "Preparing build dir: ${BUILD_DIR} ..."
+if is_mountpoint "$BUILD_DIR"; then
+  rm -rf "$BUILD_DIR"/* || true
+else
+  rm -rf "$BUILD_DIR" || true
+fi
+mkdir -p "$BUILD_DIR"
+cmake -S . -B "$BUILD_DIR" -G Ninja \
   -DPICO_SDK_PATH="/opt/pico-sdk" \
   -DPICO_TOOLCHAIN_PATH="/opt/toolchain"
 
 log "Building ..."
-cmake --build build
+cmake --build "$BUILD_DIR"
 
 # ---- Collect artifacts ----
-log "Collecting artifacts (*.uf2, *.elf, *.bin) under build/ ..."
-mapfile -t ARTIFACTS < <(find build -type f \( -name "*.uf2" -o -name "*.elf" -o -name "*.bin" \) -print || true)
+log "Collecting artifacts (*.uf2, *.elf, *.bin) under ${BUILD_DIR}/ ..."
+mapfile -t ARTIFACTS < <(find "$BUILD_DIR" -type f \( -name "*.uf2" -o -name "*.elf" -o -name "*.bin" \) -print || true)
 
 if [ "${#ARTIFACTS[@]}" -eq 0 ]; then
   err "No artifacts found under build/. Dumping tree (top 200 files):"
-  find build -type f | head -n 200 || true
+  find "$BUILD_DIR" -type f | head -n 200 || true
   exit 3
 fi
 

@@ -139,7 +139,7 @@ fi
   -v "$SRC_DIR":/work/src \
   -v "$OUT_DIR":/work/out \
   -v "$CCACHE_DIR_HOST":/work/.ccache \
-  --tmpfs /work/build:rw,size="$TMPFS_SIZE" \
+  --tmpfs /work/src/build:rw,exec,size="$TMPFS_SIZE" \
   -e CCACHE_DIR=/work/.ccache \
   --entrypoint bash \
   "$IMAGE" -lc '
@@ -149,20 +149,37 @@ fi
     echo -n "[INFO] which python: "; command -v python || true
     echo -n "[INFO] which python3: "; command -v python3 || true
 
-    # Always dump tmpfs usage on exit (success/fail) so you can see if it was full
-    trap '"'"'echo "=== TMPFS DF ==="; df -h /work/build || true; echo "=== TMPFS DU ==="; du -sh /work/build || true'"'"' EXIT
+need() { command -v "$1" >/dev/null 2>&1 || { echo "[ERROR] missing tool: $1"; exit 2; }; }
+need cmake
+need ninja
+need python
+need python3
+need arm-none-eabi-gcc
+need arm-none-eabi-objcopy
+need picotool
+need astyle
+need srec_cat
 
-    # tmpfs usage monitor (peak)
-    PEAK=0
-    monitor() {
-      while true; do
-        USED=$(df -B1 /work/build | awk "NR==2{print \$3}")
-        [ "$USED" -gt "$PEAK" ] && PEAK="$USED"
-        sleep 0.5
-      done
-    }
-    monitor &
-    MPID=$!
+
+    # Always dump tmpfs usage on exit (success/fail) so you can see if it was full
+    trap '"'"'echo "=== TMPFS DF ==="; df -h /work/src/build || true; echo "=== TMPFS DU ==="; du -sh /work/src/build || true'"'"' EXIT
+# tmpfs usage monitor (peak) - write peak to a file (subshell-safe)
+PEAK_FILE=/tmp/tmpfs_peak_bytes
+echo 0 > "$PEAK_FILE"
+monitor() {
+  local peak=0
+  while true; do
+    local used
+    used=$(df -B1 /work/src/build | awk 'NR==2{print $3}')
+    if [ "$used" -gt "$peak" ]; then
+      peak="$used"
+      echo "$peak" > "$PEAK_FILE"
+    fi
+    sleep 0.5
+  done
+}
+monitor &
+MPID=$!
 
     # Decide whether ccache is available in the image
     C_LAUNCHER=""
@@ -177,17 +194,18 @@ fi
     fi
 
     # Configure
-    cmake -S /work/src -B /work/build -G Ninja \
+    cmake -S /work/src -B /work/src/build -G Ninja \
       -DCMAKE_BUILD_TYPE='"$BUILD_TYPE"' \
       -DPICO_SDK_PATH=/opt/pico-sdk \
       -DPICO_TOOLCHAIN_PATH=/opt/toolchain \
       ${C_LAUNCHER} ${CXX_LAUNCHER}
 
     # Build (limit jobs to avoid crazy RSS peaks)
-    cmake --build /work/build -- -j '"$JOBS"'
+    cmake --build /work/src/build -- -j '"$JOBS"'
 
     # Stop monitor
     kill $MPID >/dev/null 2>&1 || true
+    PEAK=$(cat "$PEAK_FILE" 2>/dev/null || echo 0)
 
     echo "TMPFS_PEAK_BYTES=$PEAK"
     python3 - <<PY
@@ -196,7 +214,7 @@ print(f"TMPFS_PEAK_GiB={p/1024**3:.2f}")
 PY
 
     # Collect artifacts
-    find /work/build -type f \( -name "*.uf2" -o -name "*.elf" -o -name "*.bin" \) -exec cp -f {} /work/out/ \;
+    find /work/src/build -type f \( -name "*.uf2" -o -name "*.elf" -o -name "*.bin" \) -exec cp -f {} /work/out/ \;
 
     echo "=== OUTPUTS ==="
     ls -al /work/out

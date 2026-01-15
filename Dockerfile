@@ -20,13 +20,19 @@ WORKDIR /opt
 
 # ===== Base deps =====
 RUN apt-get update && apt-get install -y --no-install-recommends \
+    astyle \
+    srecord \
+    file \
+    time \
     ca-certificates \
+    ccache \
     curl \
     git \
     unzip \
     xz-utils \
     tar \
     python3 \
+    python-is-python3 \
     ninja-build \
     build-essential \
     pkg-config \
