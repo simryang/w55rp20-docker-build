@@ -20,7 +20,7 @@ REPO_URL="${REPO_URL:-https://github.com/WIZnet-ioNIC/W55RP20-S2E.git}"
 REPO_REF="${REPO_REF:-main}"          # tag/commit 가능
 
 SRC_DIR="${SRC_DIR:-$HOME/W55RP20-S2E}"
-OUT_DIR="${OUT_DIR:-$HOME/W55RP20-S2E-out}"
+OUT_DIR="${OUT_DIR:-$PWD/out}"
 CCACHE_DIR_HOST="${CCACHE_DIR_HOST:-$HOME/.ccache-w55rp20}"
 
 # RAM disk size (tmpfs upper limit). It is NOT pre-allocated.
