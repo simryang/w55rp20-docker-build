@@ -8,11 +8,12 @@ set -euo pipefail
 #   - 매번 JOBS=..., TMPFS_SIZE=... 같은 환경변수 치기 귀찮아서 만든 실행용 스크립트
 #   - 기본값을 여기서 고정하고, 필요하면 실행 시 덮어쓰기(환경변수)만 하면 됨
 #
-# 기본 사용:
+# 기본 사용 (이미지 없으면 자동 빌드):
 #   ./build.sh
 #
-# (권장) 처음 1회: 이미지까지 자동으로 빌드하고 싶으면:
-#   AUTO_BUILD_IMAGE=1 ./build.sh
+# 로컬 커스터마이징 (선택):
+#   cp build.config.example build.config
+#   vim build.config  # JOBS, TMPFS_SIZE 등 조정
 #
 # ----------------------------------------------------------------------------
 # 상황별 "한 줄" 레시피 (주석으로만 제공)
@@ -50,14 +51,22 @@ set -euo pipefail
 # ============================================================================
 #
 
-# ---- 기본값(여기만 바꾸면 됨) ----------------------------------------------
+# ---- 로컬 설정 로드 (선택) -------------------------------------------------
+# build.config 파일이 있으면 로드 (JOBS, TMPFS_SIZE 등 사전 설정 가능)
+if [ -f "${BASH_SOURCE%/*}/build.config" ]; then
+  echo "[INFO] 로컬 설정 로드: build.config"
+  # shellcheck disable=SC1091
+  source "${BASH_SOURCE%/*}/build.config"
+fi
+
+# ---- 기본값(설정 파일 없거나 미지정 시) --------------------------------------
 : "${JOBS:=16}"
 : "${TMPFS_SIZE:=24g}"
 : "${IMAGE:=w55rp20:auto}"
 : "${PLATFORM:=linux/amd64}"
 
-# AUTO_BUILD_IMAGE=1 이면 w55build.sh가 이미지 없을 때 자동 빌드 시도
-: "${AUTO_BUILD_IMAGE:=0}"
+# 이미지 자동 빌드 (이미지 없으면 자동 빌드, 있으면 재사용)
+: "${AUTO_BUILD_IMAGE:=1}"
 
 # 레포 업데이트(fetch/checkout/submodule update)
 : "${UPDATE_REPO:=0}"
@@ -131,6 +140,23 @@ if [ "${REFRESH_GCC}" -eq 1 ]; then
 fi
 
 echo "[INFO] REFRESH: APT=${REFRESH_APT_BUST:-0} SDK=${REFRESH_SDK_BUST:-0} CMAKE=${REFRESH_CMAKE_BUST:-0} GCC=${REFRESH_GCC_BUST:-0}"
+
+# REFRESH 지정되었는데 AUTO_BUILD_IMAGE=0이면 warning
+# - 명시적 지정은 존중하되, 초보자 복붙 실수 대비 정보 제공
+if [ -n "$REFRESH_APT_BUST$REFRESH_SDK_BUST$REFRESH_CMAKE_BUST$REFRESH_GCC_BUST" ]; then
+  if [ "$AUTO_BUILD_IMAGE" = "0" ]; then
+    echo "" >&2
+    echo "[WARN] ============================================================" >&2
+    echo "[WARN] REFRESH가 지정되었지만 AUTO_BUILD_IMAGE=0입니다." >&2
+    echo "[WARN] 이미지 재빌드가 필요하지만 수행되지 않으므로," >&2
+    echo "[WARN] REFRESH가 적용되지 않습니다." >&2
+    echo "[WARN]" >&2
+    echo "[WARN] 의도한 것이 아니라면:" >&2
+    echo "[WARN]   REFRESH=\"${REFRESH}\" ./build.sh" >&2
+    echo "[WARN] ============================================================" >&2
+    echo "" >&2
+  fi
+fi
 
 # w55build.sh 경로(같은 폴더에 있다고 가정)
 W55BUILD="${W55BUILD:-./w55build.sh}"
