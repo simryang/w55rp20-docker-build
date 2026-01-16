@@ -65,10 +65,16 @@ cd "$SRC_DIR"
 git config --global --add safe.directory "$SRC_DIR"
 
 # ---- Checkout desired ref ----
-log "Fetching + checkout $REPO_REF ..."
-git fetch --all --tags || true
-git checkout "$REPO_REF" || true
-git submodule update --init --recursive
+# UPDATE_REPO=1 일 때만 fetch/checkout 수행 (기본값 0)
+UPDATE_REPO="${UPDATE_REPO:-0}"
+if [ "$UPDATE_REPO" = "1" ]; then
+  log "UPDATE_REPO=1: Fetching + checkout $REPO_REF ..."
+  git fetch --all --tags || true
+  git checkout "$REPO_REF" || true
+  git submodule update --init --recursive
+else
+  log "UPDATE_REPO=0: Skipping git fetch/checkout (using existing source)"
+fi
 
 # ---- Enforce repo's internal pico-sdk to 2.2.0 if present ----
 if [ -d "libraries/pico-sdk/.git" ]; then

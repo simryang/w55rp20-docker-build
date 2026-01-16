@@ -16,6 +16,13 @@ die(){ echo "[INTERNAL][ERROR] $*" >&2; exit 2; }
 
 need(){ command -v "$1" >/dev/null 2>&1 || die "missing tool: $1"; }
 
+# Git safe.directory (Docker mount ownership 이슈 회피)
+# Git 2.35.2+ 보안 패치로 ownership 체크 강화됨
+# 컨테이너 내부(root)에서 호스트 마운트(user) 디렉토리 접근 시 필요
+if [ -d "/work/src/.git" ]; then
+  git config --global --add safe.directory /work/src
+fi
+
 log "PATH=$PATH"
 log "python=$(command -v python || echo NO)"
 log "python3=$(command -v python3 || echo NO)"

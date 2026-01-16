@@ -181,6 +181,7 @@ if [ "$VERBOSE" = "1" ]; then
   log "  -e CCACHE_DIR=/work/.ccache \\"
   log "  -e JOBS=\"$JOBS\" \\"
   log "  -e BUILD_TYPE=\"$BUILD_TYPE\" \\"
+  log "  -e UPDATE_REPO=\"$UPDATE_REPO\" \\"
   log "  \"$IMAGE\" /usr/local/bin/docker-build.sh"
   log "=============================="
 fi
@@ -193,6 +194,7 @@ fi
   -e CCACHE_DIR=/work/.ccache \
   -e JOBS="$JOBS" \
   -e BUILD_TYPE="$BUILD_TYPE" \
+  -e UPDATE_REPO="$UPDATE_REPO" \
   "$IMAGE" /usr/local/bin/docker-build.sh
 
 log "빌드 완료. 산출물: $OUT_DIR"
