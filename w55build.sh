@@ -2,10 +2,12 @@
 set -euo pipefail
 
 ###############################################################################
-# W55RP20-S2E RAM(tmpfs) Build Runner
-# - Host: Ubuntu 20.04 (works on most Linux)
-# - Requires: docker, git
-# - Optional: /usr/bin/time (usually installed as "time" package)
+# w55build.sh
+# - 호스트에서 실행하는 "메인" 빌드 스크립트
+# - Docker 이미지가 준비되어 있으면 재사용 (빠름)
+# - REFRESH_*_BUST 가 들어오면, 필요한 레이어만 선택적으로 재빌드
+# - 실제 CMake/Ninja 빌드는 컨테이너 내부 스크립트(/usr/local/bin/docker-build.sh)
+#   로 넘긴다. (heredoc 지옥, $3 언바운드 같은 사고 예방)
 ###############################################################################
 
 echo "[INFO] starting build at $(date)"
@@ -21,27 +23,24 @@ SRC_DIR="${SRC_DIR:-$HOME/W55RP20-S2E}"
 OUT_DIR="${OUT_DIR:-$HOME/W55RP20-S2E-out}"
 CCACHE_DIR_HOST="${CCACHE_DIR_HOST:-$HOME/.ccache-w55rp20}"
 
-# RAM disk size (tmpfs upper limit). It's NOT pre-allocated; it grows as used.
+# RAM disk size (tmpfs upper limit). It is NOT pre-allocated.
 TMPFS_SIZE="${TMPFS_SIZE:-20g}"
 
-# Build parallelism (Ninja -j)
-JOBS="${JOBS:-12}"
+# Build parallelism
+JOBS="${JOBS:-16}"
 
-# Build type (Release/Debug)
+# Release/Debug
 BUILD_TYPE="${BUILD_TYPE:-Release}"
 
-# If 1, build docker image automatically when missing (Dockerfile needed)
+# If 1, build docker image automatically when needed
 AUTO_BUILD_IMAGE="${AUTO_BUILD_IMAGE:-0}"
 DOCKERFILE_DIR="${DOCKERFILE_DIR:-$PWD}"   # directory containing Dockerfile
 
 # If 1, do "git fetch + checkout + submodule update" before build
 UPDATE_REPO="${UPDATE_REPO:-0}"
 
-# If 1, delete host-side build cache directory (we use tmpfs so normally not needed)
+# If 1, clean OUT_DIR artifacts
 CLEAN="${CLEAN:-0}"
-
-# If 1, keep build artifacts inside OUT_DIR only; otherwise also copy build logs
-COPY_LOGS="${COPY_LOGS:-1}"
 
 # ---------------------------- Helpers ---------------------------------------
 log(){ echo "[INFO] $*"; }
@@ -50,40 +49,58 @@ die(){ echo "[ERROR] $*" >&2; exit 1; }
 
 need_cmd() { command -v "$1" >/dev/null 2>&1 || die "필요한 커맨드가 없습니다: $1"; }
 
-human_gib() {
-  python3 - <<PY
-import sys
-b=int(sys.argv[1])
-print(f"{b/1024**3:.2f}GiB")
-PY
-}
-
 # ---------------------------- Preflight -------------------------------------
 need_cmd docker
 need_cmd git
 
-if [ ! -x /usr/bin/time ]; then
-  warn "/usr/bin/time 이 없습니다. RSS 피크 측정이 약해집니다."
-  warn "설치: sudo apt-get update && sudo apt-get install -y time"
-fi
-
-# docker daemon reachable?
 if ! sudo docker info >/dev/null 2>&1; then
-  die "Docker 데몬 접근 실패. (권한/서비스 상태 확인 필요) sudo docker info 부터 확인하세요."
+  die "Docker 데몬 접근 실패. sudo docker info 부터 확인하세요. (권한/서비스)"
 fi
 
 # ---------------------------- Ensure image ----------------------------------
+# 기본은 "이미지 있으면 재사용".
+# 다만 REFRESH_*_BUST 가 하나라도 들어오면 이미지 재빌드가 필요할 수 있음.
+
+NEED_IMAGE_BUILD=0
 if ! sudo docker image inspect "$IMAGE" >/dev/null 2>&1; then
-  if [ "$AUTO_BUILD_IMAGE" = "1" ]; then
-    log "이미지($IMAGE) 없음 -> 자동 빌드 시도"
-    [ -f "$DOCKERFILE_DIR/Dockerfile" ] || die "Dockerfile이 없습니다: $DOCKERFILE_DIR/Dockerfile"
-    ( cd "$DOCKERFILE_DIR" && \
-      sudo docker buildx build --platform "$PLATFORM" -t "$IMAGE" --load --progress=plain -f Dockerfile . )
-  else
-    die "이미지($IMAGE)가 없습니다. 먼저 빌드하거나 AUTO_BUILD_IMAGE=1로 실행하세요."
-  fi
-else
+  NEED_IMAGE_BUILD=1
+  log "이미지($IMAGE) 없음"
+fi
+
+if [ -n "${REFRESH_APT_BUST:-}${REFRESH_SDK_BUST:-}${REFRESH_CMAKE_BUST:-}${REFRESH_GCC_BUST:-}" ]; then
+  NEED_IMAGE_BUILD=1
+  log "REFRESH 지정됨 -> 이미지($IMAGE) 선택적 재빌드"
+fi
+
+if [ "$NEED_IMAGE_BUILD" = "0" ]; then
   log "이미지 존재: $IMAGE"
+else
+  if [ "$AUTO_BUILD_IMAGE" != "1" ]; then
+    die "이미지 재빌드가 필요하지만 AUTO_BUILD_IMAGE=1 이 아닙니다. (REFRESH 지정 시 AUTO_BUILD_IMAGE=1 권장)"
+  fi
+
+  [ -f "$DOCKERFILE_DIR/Dockerfile" ] || die "Dockerfile이 없습니다: $DOCKERFILE_DIR/Dockerfile"
+  [ -f "$DOCKERFILE_DIR/docker-build.sh" ] || die "docker-build.sh(컨테이너 내부 빌드 스크립트)가 없습니다: $DOCKERFILE_DIR/docker-build.sh"
+
+  log "이미지 빌드 실행 (PLATFORM=$PLATFORM)"
+  (
+    cd "$DOCKERFILE_DIR"
+
+    BUILD_CMD=(sudo docker buildx build \
+      --platform "$PLATFORM" \
+      -t "$IMAGE" \
+      --load \
+      --progress=plain)
+
+    # build.sh 래퍼가 넣어주는 선택적 refresh 토큰 (없으면 캐시 재사용)
+    if [ -n "${REFRESH_APT_BUST:-}" ]; then BUILD_CMD+=(--build-arg "REFRESH_APT=$REFRESH_APT_BUST"); fi
+    if [ -n "${REFRESH_SDK_BUST:-}" ]; then BUILD_CMD+=(--build-arg "REFRESH_SDK=$REFRESH_SDK_BUST"); fi
+    if [ -n "${REFRESH_CMAKE_BUST:-}" ]; then BUILD_CMD+=(--build-arg "REFRESH_CMAKE=$REFRESH_CMAKE_BUST"); fi
+    if [ -n "${REFRESH_GCC_BUST:-}" ]; then BUILD_CMD+=(--build-arg "REFRESH_GCC=$REFRESH_GCC_BUST"); fi
+
+    BUILD_CMD+=(-f Dockerfile .)
+    "${BUILD_CMD[@]}"
+  )
 fi
 
 # ---------------------------- Ensure repo -----------------------------------
@@ -98,22 +115,15 @@ if [ "$UPDATE_REPO" = "1" ]; then
     git fetch --all --tags && \
     git checkout "$REPO_REF" && \
     git submodule update --init --recursive )
-else
-  # ensure desired ref if first clone but different default branch?
-  ( cd "$SRC_DIR" && git rev-parse --verify "$REPO_REF" >/dev/null 2>&1 ) || true
 fi
 
-# ---------------------------- Ensure dirs -----------------------------------
 mkdir -p "$OUT_DIR" "$CCACHE_DIR_HOST"
 
-# optional cleanup (mostly for OUT_DIR)
 if [ "$CLEAN" = "1" ]; then
   log "CLEAN=1 -> OUT_DIR 정리(기존 산출물 삭제)"
-  rm -f "$OUT_DIR"/*.uf2 "$OUT_DIR"/*.elf "$OUT_DIR"/*.bin 2>/dev/null || true
-  rm -f "$OUT_DIR"/build-*.log 2>/dev/null || true
+  rm -f "$OUT_DIR"/*.uf2 "$OUT_DIR"/*.elf "$OUT_DIR"/*.bin "$OUT_DIR"/*.hex 2>/dev/null || true
 fi
 
-# ---------------------------- Build runner ----------------------------------
 log "===== SETTINGS ====="
 log "IMAGE=$IMAGE"
 log "PLATFORM=$PLATFORM"
@@ -130,101 +140,19 @@ if [ -x /usr/bin/time ]; then
   TIME_PREFIX=(/usr/bin/time -v)
 fi
 
-# Run container:
-# - Source mounted read-write (so submodule updates possible; change to :ro if you want)
-# - OUT and CCACHE persist on host
-# - /work/build is tmpfs (RAM disk)
-# - We measure tmpfs used peak by polling df
+# ---------------------------- Build (docker run) ----------------------------
+# 주의:
+# - tmpfs는 rw,exec 필요 (pioasm 같은 바이너리 실행 때문에)
+# - 컨테이너 내부 스크립트가 /work/src/build 를 사용함
+
 "${TIME_PREFIX[@]}" sudo docker run --rm -t \
   -v "$SRC_DIR":/work/src \
   -v "$OUT_DIR":/work/out \
   -v "$CCACHE_DIR_HOST":/work/.ccache \
   --tmpfs /work/src/build:rw,exec,size="$TMPFS_SIZE" \
   -e CCACHE_DIR=/work/.ccache \
-  --entrypoint bash \
-  "$IMAGE" -lc '
-    set -euo pipefail
+  -e JOBS="$JOBS" \
+  -e BUILD_TYPE="$BUILD_TYPE" \
+  "$IMAGE" /usr/local/bin/docker-build.sh
 
-    echo "[INFO] PATH=$PATH"
-    echo -n "[INFO] which python: "; command -v python || true
-    echo -n "[INFO] which python3: "; command -v python3 || true
-
-need() { command -v "$1" >/dev/null 2>&1 || { echo "[ERROR] missing tool: $1"; exit 2; }; }
-need cmake
-need ninja
-need python
-need python3
-need arm-none-eabi-gcc
-need arm-none-eabi-objcopy
-need picotool
-need astyle
-need srec_cat
-
-
-    # Always dump tmpfs usage on exit (success/fail) so you can see if it was full
-    trap '"'"'echo "=== TMPFS DF ==="; df -h /work/src/build || true; echo "=== TMPFS DU ==="; du -sh /work/src/build || true'"'"' EXIT
-# tmpfs usage monitor (peak) - write peak to a file (subshell-safe)
-PEAK_FILE=/tmp/tmpfs_peak_bytes
-echo 0 > "$PEAK_FILE"
-monitor() {
-  local peak=0
-  while true; do
-    local used
-    used=$(df -B1 /work/src/build | awk 'NR==2{print \$3}')
-    if [ "$used" -gt "$peak" ]; then
-      peak="$used"
-      echo "$peak" > "$PEAK_FILE"
-    fi
-    sleep 0.5
-  done
-}
-monitor &
-MPID=$!
-
-    # Decide whether ccache is available in the image
-    C_LAUNCHER=""
-    CXX_LAUNCHER=""
-    if command -v ccache >/dev/null 2>&1; then
-      echo "[INFO] ccache found -> enabled"
-      C_LAUNCHER="-DCMAKE_C_COMPILER_LAUNCHER=ccache"
-      CXX_LAUNCHER="-DCMAKE_CXX_COMPILER_LAUNCHER=ccache"
-      ccache -z >/dev/null 2>&1 || true
-    else
-      echo "[WARN] ccache not found in image. continuing without ccache"
-    fi
-
-    # Configure
-    cmake -S /work/src -B /work/src/build -G Ninja \
-      -DCMAKE_BUILD_TYPE='"$BUILD_TYPE"' \
-      -DPICO_SDK_PATH=/opt/pico-sdk \
-      -DPICO_TOOLCHAIN_PATH=/opt/toolchain \
-      ${C_LAUNCHER} ${CXX_LAUNCHER}
-
-    # Build (limit jobs to avoid crazy RSS peaks)
-    cmake --build /work/src/build -- -j '"$JOBS"'
-
-    # Stop monitor
-    kill $MPID >/dev/null 2>&1 || true
-    PEAK=$(cat "$PEAK_FILE" 2>/dev/null || echo 0)
-
-    echo "TMPFS_PEAK_BYTES=$PEAK"
-    python3 - <<PY
-p=int("$PEAK")
-print(f"TMPFS_PEAK_GiB={p/1024**3:.2f}")
-PY
-
-    # Collect artifacts
-    find /work/src/build -type f \( -name "*.uf2" -o -name "*.elf" -o -name "*.bin" \) -exec cp -f {} /work/out/ \;
-
-    echo "=== OUTPUTS ==="
-    ls -al /work/out
-
-    if command -v ccache >/dev/null 2>&1; then
-      echo "=== CCACHE STATS ==="
-      ccache -s || true
-    fi
-  '
-
-log "완료. 결과물 디렉토리: $OUT_DIR"
-echo "[INFO] finished build at $(date)"
-
+log "빌드 완료. 산출물: $OUT_DIR"
