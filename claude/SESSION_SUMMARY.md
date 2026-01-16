@@ -41,6 +41,16 @@
 - claude/ 폴더 생성
 - 5개 문서: README, DESIGN, VARIABLES, ISSUES, GPT_INSTRUCTIONS
 
+### 9. SESSION_SUMMARY.md 추가
+- 커밋: 7dd3e29
+- 목적: Auto-compact 대비 컨텍스트 복구
+- 전체 세션 이력, 기술 결정, 커밋 목록
+
+### 10. README.md 작성
+- 커밋: e3f59af
+- 사용자 대상 종합 문서
+- 빠른 시작, 기능 설명, 문제 해결, 성능 팁
+
 ## 핵심 설계 결정
 
 ### Option C: toolchain = cmake + gcc (별칭)
@@ -67,6 +77,8 @@
 
 ### Git 커밋 이력
 ```
+e3f59af - Add comprehensive README.md for user documentation
+7dd3e29 - Add session summary for context recovery
 301a5c7 - Add documentation for AI assistants
 461b282 - Fix AUTO_BUILD_IMAGE default and add VERBOSE mode
 ef45961 - Fix git ownership error in Docker container
@@ -90,13 +102,14 @@ eb8051a - Add selective Docker cache refresh and refactor build scripts
 
 ## 중요한 파일
 
+- README.md: 사용자 대상 종합 문서 (빠른 시작, 사용법, 문제 해결)
 - build.sh: 초보자용 래퍼, 기본값 제공
 - w55build.sh: 실제 빌드 로직
 - docker-build.sh: 컨테이너 내부 빌드
 - Dockerfile: 빌드 환경
 - entrypoint.sh: 컨테이너 진입점 (git safe.directory 설정)
 - build.config.example: 설정 예시
-- claude/: AI 협업 문서
+- claude/: AI 협업 문서 (README, DESIGN, VARIABLES, ISSUES, GPT_INSTRUCTIONS, SESSION_SUMMARY)
 
 ## 새 세션 시작 시
 
