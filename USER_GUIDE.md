@@ -4,8 +4,8 @@
 
 1. [개요](#개요)
 2. [빌드 산출물](#빌드-산출물)
-3. [방법 1: build.sh 사용 (권장)](#방법-1-buildsh-사용-권장)
-4. [방법 2: Docker 직접 사용](#방법-2-docker-직접-사용)
+3. [방법 1: Docker 직접 사용](#방법-1-docker-직접-사용)
+4. [방법 2: build.sh 사용 (간편, 권장)](#방법-2-buildsh-사용-간편-권장)
 5. [고급 사용법](#고급-사용법)
 6. [문제 해결](#문제-해결)
 7. [부록: 스크립트 구조](#부록-스크립트-구조)
@@ -60,114 +60,9 @@ cp ./out/App.uf2 /media/RPI-RP2/
 
 ---
 
-## 방법 1: build.sh 사용 (권장)
+## 방법 1: Docker 직접 사용
 
-가장 간단하고 권장되는 방법입니다. 모든 설정을 자동으로 처리합니다.
-
-### 기본 빌드
-
-```bash
-./build.sh
-```
-
-**동작:**
-1. Docker 이미지가 없으면 자동 빌드
-2. 소스 코드가 없으면 자동 클론 (`~/W55RP20-S2E`)
-3. 빌드 실행 (tmpfs 사용, ccache 활성화)
-4. 산출물을 `./out/`에 복사
-
-### 주요 옵션
-
-#### 산출물 정리 후 빌드
-```bash
-CLEAN=1 ./build.sh
-```
-
-#### 소스 코드 최신화
-```bash
-UPDATE_REPO=1 ./build.sh
-```
-
-#### 특정 브랜치/태그 빌드
-```bash
-REPO_REF=v1.2.3 ./build.sh
-```
-
-#### 디버그 빌드
-```bash
-BUILD_TYPE=Debug ./build.sh
-```
-
-#### 병렬 빌드 조정
-```bash
-# CPU 코어 수에 맞게 조정 (기본값: 16)
-JOBS=8 ./build.sh
-```
-
-#### 메모리 제한 환경
-```bash
-# tmpfs 크기 조정 (기본값: 24g)
-TMPFS_SIZE=8g ./build.sh
-```
-
-#### 상세 로그 출력
-```bash
-VERBOSE=1 ./build.sh
-```
-
-### 캐시 무효화 (REFRESH)
-
-외부 리소스가 업데이트되었을 때 사용합니다.
-
-```bash
-# apt 패키지만 재설치
-REFRESH="apt" ./build.sh
-
-# Pico SDK 재다운로드
-REFRESH="sdk" ./build.sh
-
-# CMake 재설치
-REFRESH="cmake" ./build.sh
-
-# ARM GCC 재설치
-REFRESH="gcc" ./build.sh
-
-# CMake + GCC 모두 재설치
-REFRESH="toolchain" ./build.sh
-
-# 전체 재빌드 (모든 캐시 무효화)
-REFRESH="all" ./build.sh
-```
-
-### 로컬 설정 파일 사용
-
-환경별로 고정된 설정을 사용하려면:
-
-```bash
-# 설정 파일 생성
-cp build.config.example build.config
-
-# 편집
-vim build.config
-```
-
-**build.config 예시:**
-```bash
-JOBS=32
-TMPFS_SIZE=48g
-BUILD_TYPE=Debug
-```
-
-설정 파일이 있으면 자동으로 로드됩니다:
-```bash
-./build.sh  # build.config 자동 적용
-```
-
----
-
-## 방법 2: Docker 직접 사용
-
-`build.sh` 없이 Docker 명령을 직접 사용하는 방법입니다.
+**Docker를 직접 사용하는 기본적인 방법입니다.** 빌드 스크립트 없이 순수하게 Docker 명령만으로 빌드할 수 있습니다. 각 단계를 직접 제어할 수 있어 투명하고 유연합니다.
 
 ### 1단계: Docker 이미지 빌드
 
@@ -268,6 +163,111 @@ sudo docker run --rm -t \
 
 ```bash
 ls -lh ./out/*.uf2
+```
+
+---
+
+## 방법 2: build.sh 사용 (간편, 권장)
+
+빌드 스크립트를 사용하는 간편한 방법입니다. 모든 설정을 자동으로 처리합니다.
+
+### 기본 빌드
+
+```bash
+./build.sh
+```
+
+**동작:**
+1. Docker 이미지가 없으면 자동 빌드
+2. 소스 코드가 없으면 자동 클론 (`~/W55RP20-S2E`)
+3. 빌드 실행 (tmpfs 사용, ccache 활성화)
+4. 산출물을 `./out/`에 복사
+
+### 주요 옵션
+
+#### 산출물 정리 후 빌드
+```bash
+CLEAN=1 ./build.sh
+```
+
+#### 소스 코드 최신화
+```bash
+UPDATE_REPO=1 ./build.sh
+```
+
+#### 특정 브랜치/태그 빌드
+```bash
+REPO_REF=v1.2.3 ./build.sh
+```
+
+#### 디버그 빌드
+```bash
+BUILD_TYPE=Debug ./build.sh
+```
+
+#### 병렬 빌드 조정
+```bash
+# CPU 코어 수에 맞게 조정 (기본값: 16)
+JOBS=8 ./build.sh
+```
+
+#### 메모리 제한 환경
+```bash
+# tmpfs 크기 조정 (기본값: 24g)
+TMPFS_SIZE=8g ./build.sh
+```
+
+#### 상세 로그 출력
+```bash
+VERBOSE=1 ./build.sh
+```
+
+### 캐시 무효화 (REFRESH)
+
+외부 리소스가 업데이트되었을 때 사용합니다.
+
+```bash
+# apt 패키지만 재설치
+REFRESH="apt" ./build.sh
+
+# Pico SDK 재다운로드
+REFRESH="sdk" ./build.sh
+
+# CMake 재설치
+REFRESH="cmake" ./build.sh
+
+# ARM GCC 재설치
+REFRESH="gcc" ./build.sh
+
+# CMake + GCC 모두 재설치
+REFRESH="toolchain" ./build.sh
+
+# 전체 재빌드 (모든 캐시 무효화)
+REFRESH="all" ./build.sh
+```
+
+### 로컬 설정 파일 사용
+
+환경별로 고정된 설정을 사용하려면:
+
+```bash
+# 설정 파일 생성
+cp build.config.example build.config
+
+# 편집
+vim build.config
+```
+
+**build.config 예시:**
+```bash
+JOBS=32
+TMPFS_SIZE=48g
+BUILD_TYPE=Debug
+```
+
+설정 파일이 있으면 자동으로 로드됩니다:
+```bash
+./build.sh  # build.config 자동 적용
 ```
 
 ---
