@@ -3,8 +3,15 @@
 ## ✅ 해결됨
 
 ### Git ownership 오류
-**증상:** `fatal: detected dubious ownership`
-**해결:** entrypoint.sh에 safe.directory 추가 (ef45961)
+**증상:** `fatal: detected dubious ownership in repository at '/work/src'`
+**근본 원인:** Docker 컨테이너(root)에서 호스트 마운트(user) 디렉토리 접근 시 Git 2.35.2+ 보안 체크
+**해결:**
+- 1차 (ef45961): entrypoint.sh에 safe.directory 추가
+- 2차 완전 수정 (d4aa905):
+  - docker-build.sh에도 safe.directory 추가 (빌드 진입점)
+  - entrypoint.sh UPDATE_REPO=0일 때 git fetch 건너뛰기
+  - w55build.sh UPDATE_REPO 환경 변수 전달
+**검증:** 빌드 정상 완료 확인
 
 ### AUTO_BUILD_IMAGE 불일치
 **증상:** build.sh와 w55build.sh 기본값 다름

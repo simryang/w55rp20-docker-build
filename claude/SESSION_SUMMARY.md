@@ -26,10 +26,11 @@
 - 커밋: f746218
 - 모순 감지 → 명확한 안내 메시지
 
-### 6. Git ownership 오류 수정
+### 6. Git ownership 오류 수정 (1차)
 - 커밋: ef45961
 - 문제: Docker mount ownership 불일치
-- 해결: git config --global --add safe.directory
+- 해결: entrypoint.sh에 git config --global --add safe.directory
+- 한계: w55build.sh가 docker-build.sh 직접 호출 시 미적용
 
 ### 7. VERBOSE 모드 추가
 - 커밋: 461b282
@@ -51,6 +52,15 @@
 - 사용자 대상 종합 문서
 - 빠른 시작, 기능 설명, 문제 해결, 성능 팁
 
+### 11. Git ownership 완전 수정 (2차)
+- 커밋: d4aa905
+- 근본 원인 분석: w55build.sh → docker-build.sh 경로에서 safe.directory 미설정
+- 해결:
+  1. docker-build.sh: git safe.directory 설정 추가 (빌드 진입점)
+  2. entrypoint.sh: UPDATE_REPO=0일 때 git fetch 건너뛰기
+  3. w55build.sh: UPDATE_REPO 환경 변수 컨테이너 전달
+- 결과: "dubious ownership" 오류 완전 해결, 빌드 검증 완료
+
 ## 핵심 설계 결정
 
 ### Option C: toolchain = cmake + gcc (별칭)
@@ -70,18 +80,22 @@
 ## 현재 상태
 
 ### 동작 확인
-- ✅ Git ownership 해결
+- ✅ Git ownership 완전 해결 (빌드 검증 완료)
 - ✅ AUTO_BUILD_IMAGE 일관성
 - ✅ VERBOSE 모드 동작
-- ⏳ Docker 권한 (사용자 환경)
+- ✅ UPDATE_REPO 환경 변수 전달
+- ✅ 전체 빌드 프로세스 정상 동작
+- ⏳ Docker 권한 (사용자 환경, sudo 필요)
 
 ### Git 커밋 이력
 ```
+d4aa905 - Fix Docker mount git ownership issue (완전 수정)
+3e69bf5 - Update SESSION_SUMMARY.md with README.md completion
 e3f59af - Add comprehensive README.md for user documentation
 7dd3e29 - Add session summary for context recovery
 301a5c7 - Add documentation for AI assistants
 461b282 - Fix AUTO_BUILD_IMAGE default and add VERBOSE mode
-ef45961 - Fix git ownership error in Docker container
+ef45961 - Fix git ownership error in Docker container (1차 수정)
 f746218 - Add local config support and improve AUTO_BUILD_IMAGE default
 eb8051a - Add selective Docker cache refresh and refactor build scripts
 ```

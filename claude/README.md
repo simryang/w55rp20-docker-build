@@ -43,9 +43,10 @@
 
 ### 최근 해결한 이슈
 
-- Git ownership 오류 (Docker mount) → safe.directory 추가
+- Git ownership 오류 (Docker mount) → safe.directory 완전 수정 (빌드 검증 완료)
 - AUTO_BUILD_IMAGE 기본값 불일치 → 1로 통일
 - heredoc 지옥 → docker-build.sh 분리
+- UPDATE_REPO 환경 변수 전달 → 불필요한 git fetch 방지
 
 ### 다음 작업
 
