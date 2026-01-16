@@ -89,6 +89,10 @@
 
 ### Git 커밋 이력
 ```
+35abbe7 - Reorder USER_GUIDE.md: Docker first, build.sh second
+486e725 - Add comprehensive user guide (USER_GUIDE.md)
+13c7089 - Change OUT_DIR default to project-local directory
+ad65175 - Update documentation with git ownership complete fix
 d4aa905 - Fix Docker mount git ownership issue (완전 수정)
 3e69bf5 - Update SESSION_SUMMARY.md with README.md completion
 e3f59af - Add comprehensive README.md for user documentation
@@ -100,8 +104,48 @@ f746218 - Add local config support and improve AUTO_BUILD_IMAGE default
 eb8051a - Add selective Docker cache refresh and refactor build scripts
 ```
 
-## 다음 단계 (필요 시)
+## 완료된 작업 (계속)
 
+### 12. OUT_DIR을 프로젝트 내부로 변경
+- 커밋: 13c7089
+- 변경: `$HOME/W55RP20-S2E-out` → `$PWD/out`
+- 이유: 프로젝트 구조 일관성, 산출물 관리 용이
+- .gitignore에 out/ 추가
+
+### 13. 종합 사용 설명서 작성
+- 커밋: 486e725
+- USER_GUIDE.md (840줄) 추가
+- 내용: Docker 직접 사용, build.sh 사용, 고급 사용법, 문제 해결, 스크립트 구조 부록
+
+### 14. 문서 구조 재정리
+- 커밋: 35abbe7
+- USER_GUIDE.md 순서 변경
+- 방법 1: Docker 직접 사용 (기본, 투명)
+- 방법 2: build.sh 사용 (간편, 권장)
+- 이유: 기본 원리를 먼저 보여주는 교육적 순서
+
+## 진행 중인 논의
+
+### 사용자 프로젝트 빌드 지원 및 멀티플랫폼 전략 (2026-01-16 15:40)
+- 문서: claude/DESIGN_DISCUSSIONS.md
+- 목표: 사용자가 수정한 소스를 빌드하는 명확한 워크플로우 제공
+- 플랫폼:
+  1. Linux: 프로젝트 경로 지정, 대화형 모드
+  2. Mac: Linux와 동일한 경험
+  3. Windows: VSCode/AI IDE 통합, Dev Container
+- Phase 1: build.sh 개선 (위치 인자, .build-config, 대화형 모드)
+- Phase 2: VSCode 템플릿, Windows 지원
+- Phase 3: VSCode Extension, AI IDE 통합 (MCP)
+- 상태: 설계 논의 완료, 구현 우선순위 결정 대기
+
+## 다음 단계
+
+### 즉시 구현 가능
+1. build.sh 개선 (위치 인자, .build-config, 대화형 모드)
+2. VSCode Dev Container 템플릿
+3. USER_GUIDE.md에 사용자 프로젝트 빌드 섹션 추가
+
+### 향후 고려사항
 1. Docker 권한 이슈 (sudo 없이 실행)
 2. 성능 측정 (빌드 시간, tmpfs 사용량)
 3. CI/CD 통합
