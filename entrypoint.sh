@@ -59,6 +59,11 @@ fi
 
 cd "$SRC_DIR"
 
+# ---- Git safe.directory (Docker mount ownership 이슈 회피) ----
+# Git 2.35.2+ 보안 패치로 ownership 체크 강화됨
+# 컨테이너 내부(root)에서 호스트 마운트(user) 디렉토리 접근 시 필요
+git config --global --add safe.directory "$SRC_DIR"
+
 # ---- Checkout desired ref ----
 log "Fetching + checkout $REPO_REF ..."
 git fetch --all --tags || true
