@@ -35,6 +35,65 @@ set -euo pipefail
 #
 # ============================================================================
 
+# ===== Refresh control (CSV) =====
+# Usage:
+#   ./build.sh
+#   REFRESH="apt,sdk" ./build.sh
+# Options: apt, sdk, toolchain, all
+: "${REFRESH:=}"
+
+echo "[INFO] REFRESH options (CSV): apt,sdk,toolchain,all (e.g., REFRESH=\"apt,sdk\")"
+
+# Parse CSV -> flags
+REFRESH_APT=0
+REFRESH_SDK=0
+REFRESH_TOOLCHAIN=0
+REFRESH_ALL=0
+
+if [ -n "${REFRESH}" ]; then
+  # allow commas/spaces
+  _tokens="$(echo "${REFRESH}" | tr ',' ' ')"
+  for t in ${_tokens}; do
+    case "${t}" in
+      apt) REFRESH_APT=1 ;;
+      sdk) REFRESH_SDK=1 ;;
+      toolchain) REFRESH_TOOLCHAIN=1 ;;
+      all) REFRESH_ALL=1 ;;
+      "")
+        ;;
+      *)
+        echo "[ERROR] invalid REFRESH token: '${t}' (allowed: apt,sdk,toolchain,all)"
+        exit 2
+        ;;
+    esac
+  done
+fi
+
+# all overrides others
+if [ "${REFRESH_ALL}" -eq 1 ]; then
+  REFRESH_APT=1
+  REFRESH_SDK=1
+  REFRESH_TOOLCHAIN=1
+fi
+
+# BuildKit cache-bust args (only for selected scopes)
+# One timestamp is enough (makes cache bust deterministic per run)
+_BUST="$(date +%s)"
+DOCKER_BUILD_EXTRA_ARGS=""
+
+if [ "${REFRESH_APT}" -eq 1 ]; then
+  DOCKER_BUILD_EXTRA_ARGS="${DOCKER_BUILD_EXTRA_ARGS} --build-arg REFRESH_APT=${_BUST}"
+fi
+if [ "${REFRESH_SDK}" -eq 1 ]; then
+  DOCKER_BUILD_EXTRA_ARGS="${DOCKER_BUILD_EXTRA_ARGS} --build-arg REFRESH_SDK=${_BUST}"
+fi
+if [ "${REFRESH_TOOLCHAIN}" -eq 1 ]; then
+  DOCKER_BUILD_EXTRA_ARGS="${DOCKER_BUILD_EXTRA_ARGS} --build-arg REFRESH_TOOLCHAIN=${_BUST}"
+fi
+
+export DOCKER_BUILD_EXTRA_ARGS
+echo "[INFO] DOCKER_BUILD_EXTRA_ARGS=${DOCKER_BUILD_EXTRA_ARGS:-<none>}"
+
 # ---- 기본값 영역(평소엔 건드리지 말고 그냥 "$W55BUILD") -----------------------
 # 병렬도 / RAM 빌드 공간
 : "${JOBS:=16}"

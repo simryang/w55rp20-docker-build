@@ -170,7 +170,7 @@ monitor() {
   local peak=0
   while true; do
     local used
-    used=$(df -B1 /work/src/build | awk 'NR==2{print $3}')
+    used=$(df -B1 /work/src/build | awk 'NR==2{print \$3}')
     if [ "$used" -gt "$peak" ]; then
       peak="$used"
       echo "$peak" > "$PEAK_FILE"
