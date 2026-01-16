@@ -77,10 +77,27 @@ fi
 # 빌드 타입(Release/Debug)
 : "${BUILD_TYPE:=Release}"
 
+# 상세 정보 출력 (디버깅용)
+: "${VERBOSE:=0}"
+
 # ===== Refresh control (CSV) =====
 # REFRESH를 지정하면, build cache를 해당 구간만 깨서 "이미지 재빌드"를 유도한다.
 # Options: apt, sdk, cmake, gcc, toolchain(=cmake+gcc), all
 : "${REFRESH:=}"
+
+if [ "$VERBOSE" = "1" ]; then
+  echo "[INFO] ===== build.sh 실행 정보 ====="
+  echo "[INFO] JOBS=$JOBS"
+  echo "[INFO] TMPFS_SIZE=$TMPFS_SIZE"
+  echo "[INFO] IMAGE=$IMAGE"
+  echo "[INFO] PLATFORM=$PLATFORM"
+  echo "[INFO] AUTO_BUILD_IMAGE=$AUTO_BUILD_IMAGE"
+  echo "[INFO] UPDATE_REPO=$UPDATE_REPO"
+  echo "[INFO] CLEAN=$CLEAN"
+  echo "[INFO] BUILD_TYPE=$BUILD_TYPE"
+  echo "[INFO] VERBOSE=$VERBOSE"
+  echo "[INFO] ============================="
+fi
 
 echo "[INFO] REFRESH options (CSV): apt,sdk,cmake,gcc,toolchain,all"
 
@@ -168,10 +185,29 @@ fi
 
 # /usr/bin/time -v 가 없으면 그냥 time 없이 실행 (RSS 피크 측정 불가)
 TIMEBIN="/usr/bin/time"
+if [ "$VERBOSE" = "1" ]; then
+  echo "[INFO] w55build.sh 실행: $W55BUILD"
+  echo "[INFO] 전달 변수:"
+  echo "[INFO]   JOBS=$JOBS"
+  echo "[INFO]   TMPFS_SIZE=$TMPFS_SIZE"
+  echo "[INFO]   IMAGE=$IMAGE"
+  echo "[INFO]   PLATFORM=$PLATFORM"
+  echo "[INFO]   AUTO_BUILD_IMAGE=$AUTO_BUILD_IMAGE"
+  echo "[INFO]   UPDATE_REPO=$UPDATE_REPO"
+  echo "[INFO]   CLEAN=$CLEAN"
+  echo "[INFO]   BUILD_TYPE=$BUILD_TYPE"
+  echo "[INFO]   VERBOSE=$VERBOSE"
+  echo "[INFO]   REFRESH_APT_BUST=$REFRESH_APT_BUST"
+  echo "[INFO]   REFRESH_SDK_BUST=$REFRESH_SDK_BUST"
+  echo "[INFO]   REFRESH_CMAKE_BUST=$REFRESH_CMAKE_BUST"
+  echo "[INFO]   REFRESH_GCC_BUST=$REFRESH_GCC_BUST"
+fi
+
 if [[ -x "$TIMEBIN" ]]; then
   exec "$TIMEBIN" -v env \
     JOBS="$JOBS" TMPFS_SIZE="$TMPFS_SIZE" IMAGE="$IMAGE" PLATFORM="$PLATFORM" \
     AUTO_BUILD_IMAGE="$AUTO_BUILD_IMAGE" UPDATE_REPO="$UPDATE_REPO" CLEAN="$CLEAN" BUILD_TYPE="$BUILD_TYPE" \
+    VERBOSE="$VERBOSE" \
     REFRESH_APT_BUST="$REFRESH_APT_BUST" \
     REFRESH_SDK_BUST="$REFRESH_SDK_BUST" \
     REFRESH_CMAKE_BUST="$REFRESH_CMAKE_BUST" \
@@ -182,6 +218,7 @@ else
   exec env \
     JOBS="$JOBS" TMPFS_SIZE="$TMPFS_SIZE" IMAGE="$IMAGE" PLATFORM="$PLATFORM" \
     AUTO_BUILD_IMAGE="$AUTO_BUILD_IMAGE" UPDATE_REPO="$UPDATE_REPO" CLEAN="$CLEAN" BUILD_TYPE="$BUILD_TYPE" \
+    VERBOSE="$VERBOSE" \
     REFRESH_APT_BUST="$REFRESH_APT_BUST" \
     REFRESH_SDK_BUST="$REFRESH_SDK_BUST" \
     REFRESH_CMAKE_BUST="$REFRESH_CMAKE_BUST" \

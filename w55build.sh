@@ -33,8 +33,11 @@ JOBS="${JOBS:-16}"
 BUILD_TYPE="${BUILD_TYPE:-Release}"
 
 # If 1, build docker image automatically when needed
-AUTO_BUILD_IMAGE="${AUTO_BUILD_IMAGE:-0}"
+AUTO_BUILD_IMAGE="${AUTO_BUILD_IMAGE:-1}"  # build.sh와 일치 (초보자 친화)
 DOCKERFILE_DIR="${DOCKERFILE_DIR:-$PWD}"   # directory containing Dockerfile
+
+# Verbose mode (set VERBOSE=1 for detailed output)
+VERBOSE="${VERBOSE:-0}"
 
 # If 1, do "git fetch + checkout + submodule update" before build
 UPDATE_REPO="${UPDATE_REPO:-0}"
@@ -99,6 +102,13 @@ else
     if [ -n "${REFRESH_GCC_BUST:-}" ]; then BUILD_CMD+=(--build-arg "REFRESH_GCC=$REFRESH_GCC_BUST"); fi
 
     BUILD_CMD+=(-f Dockerfile .)
+
+    if [ "$VERBOSE" = "1" ]; then
+      log "===== Docker build command ====="
+      printf '[INFO] %s\n' "${BUILD_CMD[*]}"
+      log "================================="
+    fi
+
     "${BUILD_CMD[@]}"
   )
 fi
@@ -133,6 +143,22 @@ log "CCACHE_DIR_HOST=$CCACHE_DIR_HOST"
 log "TMPFS_SIZE=$TMPFS_SIZE"
 log "JOBS=$JOBS"
 log "BUILD_TYPE=$BUILD_TYPE"
+log "AUTO_BUILD_IMAGE=$AUTO_BUILD_IMAGE"
+log "UPDATE_REPO=$UPDATE_REPO"
+log "CLEAN=$CLEAN"
+
+if [ "$VERBOSE" = "1" ]; then
+  log "===== VERBOSE INFO ====="
+  log "REFRESH_APT_BUST=${REFRESH_APT_BUST:-<not set>}"
+  log "REFRESH_SDK_BUST=${REFRESH_SDK_BUST:-<not set>}"
+  log "REFRESH_CMAKE_BUST=${REFRESH_CMAKE_BUST:-<not set>}"
+  log "REFRESH_GCC_BUST=${REFRESH_GCC_BUST:-<not set>}"
+  log "REPO_URL=$REPO_URL"
+  log "REPO_REF=$REPO_REF"
+  log "DOCKERFILE_DIR=$DOCKERFILE_DIR"
+  log "========================"
+fi
+
 log "===================="
 
 TIME_PREFIX=()
@@ -144,6 +170,20 @@ fi
 # 주의:
 # - tmpfs는 rw,exec 필요 (pioasm 같은 바이너리 실행 때문에)
 # - 컨테이너 내부 스크립트가 /work/src/build 를 사용함
+
+if [ "$VERBOSE" = "1" ]; then
+  log "===== Docker run command ====="
+  log "sudo docker run --rm -t \\"
+  log "  -v \"$SRC_DIR\":/work/src \\"
+  log "  -v \"$OUT_DIR\":/work/out \\"
+  log "  -v \"$CCACHE_DIR_HOST\":/work/.ccache \\"
+  log "  --tmpfs /work/src/build:rw,exec,size=\"$TMPFS_SIZE\" \\"
+  log "  -e CCACHE_DIR=/work/.ccache \\"
+  log "  -e JOBS=\"$JOBS\" \\"
+  log "  -e BUILD_TYPE=\"$BUILD_TYPE\" \\"
+  log "  \"$IMAGE\" /usr/local/bin/docker-build.sh"
+  log "=============================="
+fi
 
 "${TIME_PREFIX[@]}" sudo docker run --rm -t \
   -v "$SRC_DIR":/work/src \
