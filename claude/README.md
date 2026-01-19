@@ -59,15 +59,39 @@
 - heredoc 지옥 → docker-build.sh 분리
 - UPDATE_REPO 환경 변수 전달 → 불필요한 git fetch 방지
 
+### v1.1.0 완료 (2026-01-19)
+
+**구현 완료:**
+- ✅ CLI 옵션 파싱 (--project, --output, --clean, --debug 등)
+- ✅ .build-config 자동 저장/로드
+- ✅ Interactive mode (--setup)
+- ✅ Progress display (빌드 전/후 상태 표시)
+- ✅ 도움말 (--help, --version, --show-config)
+
+**테스트 완료:**
+- ✅ test-cli-options.sh (19 tests)
+- ✅ test-build-config.sh (10 tests)
+- ✅ test-interactive-mode.sh (16 tests)
+- ✅ test-progress-display.sh (15 tests)
+- ✅ test-integration.sh (14 tests)
+- **총 74개 테스트 모두 통과**
+
+**문서 업데이트:**
+- ✅ README.md - v1.1.0 기능 추가
+- ✅ UX_DESIGN.md - 3가지 페르소나 플로우
+- ✅ ADVANCED_OPTIONS.md - 전체 옵션 상세 설명
+
 ### 진행 중인 논의
 
 - **사용자 프로젝트 빌드 지원** (2026-01-16)
   - 문서: `claude/DESIGN_DISCUSSIONS.md`
   - 목표: 멀티플랫폼 개발 워크플로우 (Linux/Mac/Windows)
-  - 상태: 설계 완료, 구현 우선순위 결정 대기
+  - 상태: v1.1.0에서 CLI 옵션으로 기본 지원 완료
+  - 다음: VSCode Dev Container 템플릿
 
 ### 다음 작업
 
-- build.sh 개선 (위치 인자, 대화형 모드, .build-config)
-- VSCode Dev Container 템플릿
+- VSCode Dev Container 템플릿 작성
+- Windows PowerShell 래퍼 (build.ps1)
+- 실제 사용자 피드백 수집
 - 이슈 확인: `claude/ISSUES.md`
