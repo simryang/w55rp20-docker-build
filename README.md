@@ -258,6 +258,8 @@ TMPFS_SIZE=24g ./build.sh  # 48GB RAM 시스템
 
 ## 문서
 
+### 사용자 문서
+
 - **[BEGINNER_GUIDE.md](BEGINNER_GUIDE.md)** - 🌟 Docker 처음이라면 여기부터! 🌟
   - Docker 개념 설명 (비유와 그림으로)
   - 완전 초보자 단계별 가이드
@@ -268,6 +270,18 @@ TMPFS_SIZE=24g ./build.sh  # 48GB RAM 시스템
   - Docker 직접 사용법
   - build.sh 상세 옵션
   - 스크립트 아키텍처
+
+### 개발자 문서
+
+- **[ARCHITECTURE.md](ARCHITECTURE.md)** - 🔧 내부를 파고들고 싶다면! 🔧
+  - 전체 아키텍처 다이어그램
+  - 스크립트 실행 흐름 상세 분석
+  - Docker 레이어 구조
+  - 변수 전파 메커니즘
+  - 캐시 전략 (Docker + ccache)
+  - 확장/커스터마이징 가이드
+  - 디버깅 가이드
+  - 기여 가이드
 
 - **[claude/ADVANCED_OPTIONS.md](claude/ADVANCED_OPTIONS.md)** - 고급 옵션 전체 설명
   - 모든 CLI 옵션 상세 설명

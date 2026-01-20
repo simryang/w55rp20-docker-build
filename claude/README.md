@@ -6,8 +6,9 @@
 ```
 .
 ├── README.md          # 사용자 대상 문서 (빠른 시작)
-├── BEGINNER_GUIDE.md  # 완전 초보자 가이드 (Docker 개념부터)
+├── BEGINNER_GUIDE.md  # 완전 초보자 가이드 (832줄, Docker 개념부터)
 ├── USER_GUIDE.md      # 상세 사용 설명서 (840줄)
+├── ARCHITECTURE.md    # 내부 아키텍처 문서 (1361줄, 개발자용)
 ├── build.sh           # 초보자용 래퍼 (기본값 제공)
 ├── w55build.sh        # 실제 빌드 로직 (상세 제어)
 ├── docker-build.sh    # 컨테이너 내부 빌드 스크립트

@@ -212,6 +212,22 @@ eb8051a - Add selective Docker cache refresh and refactor build scripts
 - 목적: "미쳐버린 도커 배포가 두렵지 않은" 문서
 - README.md에 링크 추가 (문서 섹션 최상단)
 
+### 18. ARCHITECTURE.md 추가 (2026-01-20)
+- 내부 구조를 완전히 파고들고 싶은 개발자 대상 (1361줄, 37KB)
+- 내용:
+  1. 전체 아키텍처 (컴포넌트 다이어그램, 데이터 흐름)
+  2. 실행 흐름 상세 분석 (build.sh → w55build.sh → docker)
+  3. 스크립트 구조 (함수 목록, 변수 스코프)
+  4. Docker 레이어 아키텍처 (Dockerfile 분석, 캐시 전략)
+  5. 변수와 환경 전파 (우선순위, 전파 경로)
+  6. 캐시 전략 (Docker Layer Cache, ccache, tmpfs)
+  7. 에러 핸들링 (종류별 처리, Exit Code)
+  8. 확장 및 커스터마이징 (새 옵션, REFRESH 타겟, 빌드 타입)
+  9. 디버깅 가이드 (VERBOSE, 컨테이너 내부, 로그 분석)
+  10. 기여 가이드 (코드 스타일, 테스트, 커밋 메시지)
+- 목적: "웹검색 없이 자급자족" 수준의 내부 문서
+- README.md 문서 섹션을 "사용자/개발자"로 분류
+
 ## 최근 Git 커밋 (v1.1.0+)
 ```
 [HEAD] - Add BEGINNER_GUIDE.md and update documentation links
