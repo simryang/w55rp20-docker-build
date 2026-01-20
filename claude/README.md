@@ -6,6 +6,7 @@
 ```
 .
 ├── README.md          # 사용자 대상 문서 (빠른 시작)
+├── BEGINNER_GUIDE.md  # 완전 초보자 가이드 (Docker 개념부터)
 ├── USER_GUIDE.md      # 상세 사용 설명서 (840줄)
 ├── build.sh           # 초보자용 래퍼 (기본값 제공)
 ├── w55build.sh        # 실제 빌드 로직 (상세 제어)
@@ -77,7 +78,8 @@
 - **총 74개 테스트 모두 통과**
 
 **문서 업데이트:**
-- ✅ README.md - v1.1.0 기능 추가
+- ✅ README.md - v1.1.0 기능 추가, 시간 추정, FAQ
+- ✅ BEGINNER_GUIDE.md - 완전 초보자용 위키 수준 가이드 (NEW!)
 - ✅ UX_DESIGN.md - 3가지 페르소나 플로우
 - ✅ ADVANCED_OPTIONS.md - 전체 옵션 상세 설명
 

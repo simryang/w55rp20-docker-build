@@ -17,6 +17,10 @@ ls -l ./out/
 
 끝! 이게 전부입니다.
 
+**⏱️ 소요 시간:**
+- **첫 실행:** 약 20~25분 (Docker 이미지 빌드 포함)
+- **이후 빌드:** 약 2~3분 (이미지 재사용)
+
 ### v1.1.0 새로운 기능
 
 - **대화형 모드**: `--setup`으로 초보자 친화적 설정
@@ -254,6 +258,12 @@ TMPFS_SIZE=24g ./build.sh  # 48GB RAM 시스템
 
 ## 문서
 
+- **[BEGINNER_GUIDE.md](BEGINNER_GUIDE.md)** - 🌟 Docker 처음이라면 여기부터! 🌟
+  - Docker 개념 설명 (비유와 그림으로)
+  - 완전 초보자 단계별 가이드
+  - 문제 해결 체크리스트
+  - 내 프로젝트 빌드하기
+
 - **[USER_GUIDE.md](USER_GUIDE.md)** - 상세 사용 설명서 (840줄)
   - Docker 직접 사용법
   - build.sh 상세 옵션
@@ -293,6 +303,92 @@ TMPFS_SIZE=24g ./build.sh  # 48GB RAM 시스템
 2. 테스트 스위트 실행
 3. Git 커밋 (상세한 메시지)
 4. `claude/` 문서 업데이트 (필요 시)
+
+---
+
+## 자주 묻는 질문 (FAQ)
+
+### Q1: 첫 실행이 너무 오래 걸려요 (20분+)
+**A:** 정상입니다! 첫 실행 시 Docker 이미지를 빌드합니다.
+- Ubuntu 다운로드 (500MB)
+- ARM GCC 컴파일러 설치 (300MB)
+- Pico SDK 다운로드 (200MB)
+- 총 약 20~25분 소요
+
+**한 번만** 기다리면 됩니다. 이후 빌드는 2~3분만 소요됩니다.
+
+### Q2: 이미지 빌드를 건너뛸 수 있나요?
+**A:** 없습니다. Docker 이미지는 필수입니다.
+하지만 한 번 만들어진 이미지는 계속 재사용되므로, 다음 빌드부터는 빠릅니다.
+
+### Q3: 매번 `./build.sh`를 실행해야 하나요?
+**A:** 아니요! `--setup`으로 설정을 저장하면:
+```bash
+./build.sh --setup          # 한 번만 설정
+./build.sh                   # 이후 간단하게
+```
+`.build-config`에 설정이 저장되어 자동으로 로드됩니다.
+
+### Q4: 빌드 결과물은 어디에 있나요?
+**A:** `./out/` 디렉토리에 생성됩니다.
+```bash
+ls -l ./out/
+# App.uf2, Boot.uf2 등의 파일 확인
+```
+
+### Q5: Docker가 뭔가요? 왜 필요한가요?
+**A:** Docker는 "격리된 빌드 환경"을 제공합니다.
+- ✅ 시스템 오염 없음 (설치 파일들이 컨테이너 안에만)
+- ✅ 버전 고정 (ARM GCC 14.2, CMake 3.28.3 등)
+- ✅ 이식성 (어떤 Linux에서나 동일하게 동작)
+
+### Q6: `build.sh`와 Docker 이미지의 관계는?
+**A:**
+- `build.sh`: 사용자가 실행하는 스크립트 (git에 있음)
+- Docker 이미지: 빌드 도구들이 설치된 환경 (로컬에 생성됨)
+
+```
+git clone → build.sh 받음
+./build.sh → Docker 이미지 빌드 (한 번만)
+./build.sh → 이미지 사용해서 빌드 (계속 재사용)
+```
+
+### Q7: 여러 프로젝트를 빌드할 수 있나요?
+**A:** 네! `--project` 옵션을 사용하세요.
+```bash
+./build.sh --project ~/project-A
+./build.sh --project ~/project-B
+./build.sh --project ~/project-C
+```
+
+### Q8: Windows에서도 사용할 수 있나요?
+**A:** WSL (Windows Subsystem for Linux) 또는 Git Bash에서 가능합니다.
+```bash
+# WSL에서
+wsl
+./build.sh
+
+# Git Bash에서
+bash build.sh
+```
+
+### Q9: 빌드가 실패해요!
+**A:** 상세 로그를 확인하세요:
+```bash
+./build.sh --verbose
+```
+
+자주 발생하는 문제:
+- Docker 미실행: `sudo systemctl start docker`
+- 권한 문제: `sudo usermod -aG docker $USER` (재로그인 필요)
+- 메모리 부족: `--jobs 4` 옵션 사용
+
+### Q10: 설정을 초기화하고 싶어요
+**A:** `.build-config` 파일을 삭제하고 다시 설정하세요.
+```bash
+rm .build-config
+./build.sh --setup
+```
 
 ---
 

@@ -169,6 +169,55 @@ eb8051a - Add selective Docker cache refresh and refactor build scripts
 - build.config.example: 설정 예시
 - claude/: AI 협업 문서 (README, DESIGN, VARIABLES, ISSUES, GPT_INSTRUCTIONS, SESSION_SUMMARY)
 
+## 완료된 작업 (v1.1.0 - 2026-01-19)
+
+### 15. v1.1.0 기능 구현 및 테스트
+- 완료일: 2026-01-19
+- 구현 내용:
+  - ✅ CLI 옵션 파싱 (--project, --output, --clean, --debug, --jobs, --refresh 등)
+  - ✅ .build-config 자동 저장/로드
+  - ✅ Interactive mode (--setup) - 대화형 프로젝트 설정
+  - ✅ Progress display - 빌드 전/후 상태 및 산출물 정보
+  - ✅ 도움말 (--help, --version, --show-config)
+- 테스트:
+  - ✅ test-cli-options.sh (19 tests)
+  - ✅ test-build-config.sh (10 tests)
+  - ✅ test-interactive-mode.sh (16 tests)
+  - ✅ test-progress-display.sh (15 tests)
+  - ✅ test-integration.sh (14 tests)
+  - **총 74개 테스트 모두 통과**
+- Git 태그: v1.1.0
+
+### 16. 문서 개선 (2026-01-20)
+- README.md 업데이트:
+  - 시간 추정 추가 (첫 실행: 20~25분, 이후: 2~3분)
+  - FAQ 섹션 추가 (10개 질문)
+  - v1.1.0 기능 설명
+- build.sh 배포 방식 분석:
+  - 3가지 옵션 비교 (현재/Docker Hub/문서만)
+  - 8가지 사용 사례 평가
+  - 결론: 현재 방식(Option 1) 유지 권장 (36/40점)
+
+### 17. BEGINNER_GUIDE.md 추가 (2026-01-20)
+- 완전 초보자 대상 위키 수준 가이드
+- 내용:
+  1. Docker 개념 설명 (비유와 그림)
+  2. 사전 준비사항 (Docker 설치 가이드)
+  3. 첫 빌드 단계별 가이드
+  4. 무슨 일이 일어나는지 이해하기
+  5. 자주 발생하는 문제와 해결법
+  6. 내 프로젝트 빌드하기
+  7. 고급 기능 사용하기
+  8. 개념 정리
+- 목적: "미쳐버린 도커 배포가 두렵지 않은" 문서
+- README.md에 링크 추가 (문서 섹션 최상단)
+
+## 최근 Git 커밋 (v1.1.0+)
+```
+[HEAD] - Add BEGINNER_GUIDE.md and update documentation links
+[v1.1.0 tag] - Complete v1.1.0 implementation with all tests passing
+```
+
 ## 새 세션 시작 시
 
 1. `claude/SESSION_SUMMARY.md` 읽기 (이 파일)
