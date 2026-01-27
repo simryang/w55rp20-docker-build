@@ -5,7 +5,7 @@
 1. [개요](#개요)
 2. [빌드 산출물](#빌드-산출물)
 3. [방법 1: Docker 직접 사용](#방법-1-docker-직접-사용)
-4. [방법 2: build.sh 사용 (간편, 권장)](#방법-2-buildsh-사용-간편-권장)
+4. [방법 2: build.sh 사용 (권장)](#방법-2-buildsh-사용-간편-권장)
 5. [고급 사용법](#고급-사용법)
 6. [문제 해결](#문제-해결)
 7. [부록: 스크립트 구조](#부록-스크립트-구조)
@@ -167,9 +167,9 @@ ls -lh ./out/*.uf2
 
 ---
 
-## 방법 2: build.sh 사용 (간편, 권장)
+## 방법 2: build.sh 사용 (권장)
 
-빌드 스크립트를 사용하는 간편한 방법입니다. 모든 설정을 자동으로 처리합니다.
+빌드 스크립트를 사용하는 방법입니다. 모든 설정을 자동으로 처리합니다.
 
 ### 기본 빌드
 
@@ -464,7 +464,7 @@ docker-build.sh (실제 빌드)
 **역할:** 사용자 진입점, 기본값 제공
 
 **특징:**
-- 초보자 친화적 ("그냥 실행하면 됨")
+- 입문자용 ("그냥 실행하면 됨")
 - 합리적인 기본값 설정
 - build.config 자동 로드
 - REFRESH 문자열 파싱 (예: "apt", "sdk", "toolchain")
@@ -836,5 +836,32 @@ BUILD_TYPE=Release
 
 ---
 
-**문서 버전:** 2026-01-16
-**작성자:** AI-assisted documentation
+## 관련 문서
+
+### 필수 가이드
+- **[README.md](../README.md)** - 프로젝트 개요 및 빠른 시작
+- **[BEGINNER_GUIDE.md](BEGINNER_GUIDE.md)** - 입문자 가이드
+- **[QUICKREF.md](QUICKREF.md)** - 1페이지 빠른 참조
+
+### 문제 해결
+- **[TROUBLESHOOTING.md](TROUBLESHOOTING.md)** - 에러 해결 가이드
+- **[BUILD_LOGS.md](BUILD_LOGS.md)** - 빌드 로그 예제
+
+### 실전 활용
+- **[EXAMPLES.md](EXAMPLES.md)** - 5가지 실전 예제
+
+### 플랫폼별 설치
+- **[INSTALL_LINUX.md](INSTALL_LINUX.md)** - Linux
+- **[INSTALL_MAC.md](INSTALL_MAC.md)** - macOS
+- **[INSTALL_WINDOWS.md](INSTALL_WINDOWS.md)** - Windows/WSL2
+- **[INSTALL_RASPBERRY_PI.md](INSTALL_RASPBERRY_PI.md)** - Raspberry Pi
+
+### 참고 자료
+- **[GLOSSARY.md](GLOSSARY.md)** - 용어 사전
+- **[CHANGELOG.md](CHANGELOG.md)** - 변경 이력
+- **[ARCHITECTURE.md](ARCHITECTURE.md)** - 내부 아키텍처 (개발자용)
+
+---
+
+**문서 버전:** 2026-01-21
+**작성자:** Community contribution

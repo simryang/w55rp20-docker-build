@@ -1,6 +1,6 @@
-# W55RP20 빌드 시스템 완전 초보자 가이드
+# W55RP20 빌드 시스템 입문 가이드
 
-> Docker를 한 번도 써본 적 없어도 괜찮습니다. 이 가이드를 따라하면 누구나 W55RP20 펌웨어를 빌드할 수 있습니다.
+> Docker 경험이 없어도 괜찮습니다. 이 가이드로 W55RP20 펌웨어를 빌드할 수 있습니다.
 
 ## 목차
 
@@ -31,10 +31,10 @@ Docker는 **"이사갈 때 쓰는 컨테이너 박스"**와 비슷합니다.
 └── 기타 의존성 패키지들 (100개+)
 
 문제점:
-❌ 내 시스템이 "오염"됨
-❌ 다른 프로젝트와 버전 충돌 가능
-❌ 삭제하기 어려움
-❌ 다른 컴퓨터에서 재현 불가능
+ 내 시스템이 "오염"됨
+ 다른 프로젝트와 버전 충돌 가능
+ 삭제하기 어려움
+ 다른 컴퓨터에서 재현 불가능
 ```
 
 **Docker로 빌드한다면:**
@@ -43,19 +43,19 @@ Docker 컨테이너 안에만 설치:
 ┌─────────────────────────────┐
 │ 격리된 빌드 환경 (컨테이너) │
 ├─────────────────────────────┤
-│ ✅ ARM GCC 컴파일러         │
-│ ✅ CMake 빌드 도구          │
-│ ✅ Pico SDK                 │
-│ ✅ Python 라이브러리들      │
+│ ARM GCC 컴파일러         │
+│ CMake 빌드 도구          │
+│ Pico SDK                 │
+│ Python 라이브러리들      │
 └─────────────────────────────┘
         ↓
    내 컴퓨터는 깨끗
 
 장점:
-✅ 내 시스템 오염 없음
-✅ 버전 충돌 없음
-✅ 필요 없으면 이미지만 삭제
-✅ 어디서나 동일하게 동작
+내 시스템 오염 없음
+버전 충돌 없음
+필요 없으면 이미지만 삭제
+어디서나 동일하게 동작
 ```
 
 ### 실제 동작 방식
@@ -258,7 +258,7 @@ cd W55RP20-S2E
 [6/6] 완료!
 ```
 
-**커피 한 잔 하고 오세요!** ☕
+**커피 한 잔 하고 오세요!** 
 
 ### 3.4 빌드 성공 확인
 
@@ -274,7 +274,7 @@ ls -l ./out/
 -rw-r--r-- 1 user user 131072 Jan 20 10:30 Boot.uf2
 ```
 
-**축하합니다!** 🎉 첫 빌드 성공!
+**축하합니다!** 첫 빌드 성공!
 
 ---
 
@@ -325,7 +325,7 @@ Docker 이미지 재사용: 0분 (이미 있음!)
 = 총 2~3분
 ```
 
-Docker 이미지는 **한 번만 만들어지고 계속 재사용**됩니다!
+Docker 이미지는 한 번 만들어지면 계속 재사용됩니다!
 
 ---
 
@@ -476,7 +476,7 @@ my-w55rp20-project/
 └── ...
 ```
 
-**중요:** `CMakeLists.txt` 파일이 반드시 있어야 합니다.
+**중요:** `CMakeLists.txt` 파일이 필요합니다.
 
 ### 6.2 대화형 모드로 설정
 
@@ -503,8 +503,8 @@ cd /path/to/W55RP20-S2E  # 빌드 시스템 위치
 
 스크립트가 자동으로 검증:
 ```
-✓ 디렉토리 존재 확인
-✓ CMakeLists.txt 확인
+ 디렉토리 존재 확인
+ CMakeLists.txt 확인
 ```
 
 **설정 저장 후 빌드:**
@@ -607,7 +607,7 @@ done
 ./build.sh --clean
 ```
 
-**완전히 새로 시작:**
+**처음부터 시작:**
 ```bash
 rm -rf src/ out/ .build-config
 ./build.sh
@@ -683,12 +683,12 @@ pipeline {
 
 | 파일 | 역할 | 수정 가능? |
 |------|------|-----------|
-| `build.sh` | 초보자용 래퍼 스크립트 | ✅ (고급 사용자) |
-| `w55build.sh` | 실제 빌드 로직 | ❌ (건드리지 마세요) |
-| `Dockerfile` | Docker 이미지 레시피 | ❌ (건드리지 마세요) |
-| `.build-config` | 저장된 설정 | ✅ (자동 생성, 수동 편집 가능) |
-| `build.config.example` | 설정 예시 | 📖 (참고용) |
-| `out/` | 빌드 산출물 | ❌ (자동 생성) |
+| `build.sh` | 초보자용 래퍼 스크립트 | (고급 사용자) |
+| `w55build.sh` | 실제 빌드 로직 |  (건드리지 마세요) |
+| `Dockerfile` | Docker 이미지 레시피 |  (건드리지 마세요) |
+| `.build-config` | 저장된 설정 | (자동 생성, 수동 편집 가능) |
+| `build.config.example` | 설정 예시 | (참고용) |
+| `out/` | 빌드 산출물 |  (자동 생성) |
 
 ### 8.2 설정 우선순위
 
@@ -801,26 +801,43 @@ docker run --rm -v ~/.ccache-w55rp20:/root/.ccache w55rp20:auto ccache -s
 ### 다음 단계
 
 이제 여러분은:
-- ✅ Docker 기본 개념 이해
-- ✅ W55RP20 펌웨어 빌드 가능
-- ✅ 내 프로젝트 빌드 가능
-- ✅ 문제 발생 시 해결 가능
+- Docker 기본 개념 이해
+- W55RP20 펌웨어 빌드 가능
+- 내 프로젝트 빌드 가능
+- 문제 발생 시 해결 가능
 
 ### 더 알아보기
 
-- **[README.md](README.md)** - 빠른 레퍼런스
-- **[USER_GUIDE.md](USER_GUIDE.md)** - 상세 매뉴얼 (840줄)
-- **[claude/ADVANCED_OPTIONS.md](claude/ADVANCED_OPTIONS.md)** - 모든 옵션 설명
-- **[claude/UX_DESIGN.md](claude/UX_DESIGN.md)** - 사용자 시나리오
+**기본 문서:**
+- **[README.md](../README.md)** - 빠른 레퍼런스
+- **[QUICKREF.md](QUICKREF.md)** - 1페이지 치트시트
+- **[USER_GUIDE.md](USER_GUIDE.md)** - 상세 매뉴얼
+
+**실전 가이드:**
+- **[BUILD_LOGS.md](BUILD_LOGS.md)** - 실제 빌드 로그 예제
+- **[EXAMPLES.md](EXAMPLES.md)** - 5가지 실전 예제
+- **[TROUBLESHOOTING.md](TROUBLESHOOTING.md)** - 문제 해결 가이드
+
+**플랫폼별 설치:**
+- **[INSTALL_LINUX.md](INSTALL_LINUX.md)** - Linux 설치 가이드
+- **[INSTALL_MAC.md](INSTALL_MAC.md)** - macOS 설치 가이드
+- **[INSTALL_WINDOWS.md](INSTALL_WINDOWS.md)** - Windows/WSL2 설치 가이드
+- **[INSTALL_RASPBERRY_PI.md](INSTALL_RASPBERRY_PI.md)** - Raspberry Pi 설치 가이드
+
+**참고 자료:**
+- **[GLOSSARY.md](GLOSSARY.md)** - 용어 사전
+- **[CHANGELOG.md](CHANGELOG.md)** - 변경 이력
+- **[ARCHITECTURE.md](ARCHITECTURE.md)** - 내부 구조 (개발자용)
 
 ### 도움 받기
 
 문제가 생기면:
 
-1. `./build.sh --help` 확인
-2. 이 가이드 다시 읽기
-3. GitHub Issues에 질문 올리기
-4. 커뮤니티 포럼 방문
+1. **[TROUBLESHOOTING.md](TROUBLESHOOTING.md)** - 에러별 해결 방법 확인
+2. **[BUILD_LOGS.md](BUILD_LOGS.md)** - 정상 로그와 비교
+3. `./build.sh --help` 확인
+4. 이 가이드 다시 읽기
+5. GitHub Issues에 질문 올리기
 
 ### 기여하기
 
@@ -829,4 +846,4 @@ docker run --rm -v ~/.ccache-w55rp20:/root/.ccache w55rp20:auto ccache -s
 - 문서 개선 제안
 - Pull Request
 
-**즐거운 개발 되세요!** 🚀
+**즐거운 개발 되세요!** 

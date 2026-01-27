@@ -1,6 +1,6 @@
 # W55RP20 빌드 시스템 아키텍처
 
-> 내부 구조를 완전히 이해하고, 수정하고, 확장하고 싶은 개발자를 위한 문서
+> 내부 구조를 이해하고, 수정하고, 확장하려는 개발자를 위한 문서
 
 ## 목차
 
@@ -28,13 +28,13 @@
 │                                                               │
 │  ┌─────────────┐                                            │
 │  │  build.sh   │ ← 사용자 인터페이스                        │
-│  │  (721줄)    │   - CLI 파싱                               │
+│  │             │   - CLI 파싱                               │
 │  └──────┬──────┘   - .build-config 관리                     │
 │         │          - 대화형 모드                             │
 │         ↓                                                     │
 │  ┌─────────────┐                                            │
 │  │ w55build.sh │ ← 빌드 오케스트레이터                      │
-│  │  (473줄)    │   - 변수 검증                              │
+│  │             │   - 변수 검증                              │
 │  └──────┬──────┘   - Docker 이미지 관리                     │
 │         │          - 컨테이너 실행                           │
 │         │                                                     │
@@ -128,7 +128,7 @@ Mount:
 
 ```bash
 #!/usr/bin/env bash
-# build.sh (721줄)
+# build.sh
 
 main() {
     # 1. 버전 정보
@@ -203,7 +203,7 @@ main() {
 
 ```bash
 #!/usr/bin/env bash
-# w55build.sh (473줄)
+# w55build.sh
 
 main() {
     # 1. 변수 기본값 (build.config 로드 포함)
@@ -1094,7 +1094,7 @@ ls -lh /tmp/build/**/*.uf2
 ```bash
 grep -i error build.log
 grep -i warning build.log
-grep "✗\|failed\|error" build.log
+grep "\|failed\|error" build.log
 ```
 
 **타이밍 분석:**
@@ -1161,7 +1161,7 @@ if [ condition ]; then
 fi
 
 # 4. 중괄호 변수
-echo "${VAR}"  # ✓
+echo "${VAR}"  # 
 echo "$VAR"    # △ (간단한 경우 OK)
 
 # 5. 에러 핸들링
@@ -1227,7 +1227,6 @@ assert_output_contains "expected text"
 
 <body>
 
-Co-Authored-By: Claude Sonnet 4.5 <noreply@anthropic.com>
 ```
 
 **type:**
@@ -1246,7 +1245,6 @@ feat: Add --dry-run option for preview mode
 - Show docker command without executing
 - Update help text with new option
 
-Co-Authored-By: Claude Sonnet 4.5 <noreply@anthropic.com>
 ```
 
 ### 10.4 문서 업데이트
@@ -1283,7 +1281,6 @@ Dockerfile 변경    → ARCHITECTURE.md
 □ 문서 업데이트
 □ CHANGELOG 업데이트 (해당 시)
 □ 커밋 메시지 명확
-□ Co-Authored-By 태그 (AI 협업 시)
 ```
 
 ---

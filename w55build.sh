@@ -56,8 +56,50 @@ need_cmd() { command -v "$1" >/dev/null 2>&1 || die "필요한 커맨드가 없�
 need_cmd docker
 need_cmd git
 
-if ! sudo docker info >/dev/null 2>&1; then
-  die "Docker 데몬 접근 실패. sudo docker info 부터 확인하세요. (권한/서비스)"
+# Docker 명령 자동 선택 (docker 그룹 유무에 따라)
+DOCKER_CMD="docker"
+if ! docker info >/dev/null 2>&1; then
+  # docker 그룹 없음 → sudo 시도
+  if sudo -n docker info >/dev/null 2>&1; then
+    DOCKER_CMD="sudo docker"
+    warn "docker 그룹 미설정. sudo 사용 중 (성능 최적화: sudo usermod -aG docker $USER)"
+  else
+    # sudo도 안됨 (비밀번호 필요 또는 권한 없음)
+    echo "" >&2
+    echo "[ERROR] Docker 접근 실패" >&2
+    echo "" >&2
+
+    # Docker 데몬 상태 확인
+    if ! sudo systemctl is-active docker >/dev/null 2>&1; then
+      echo "원인: Docker 데몬이 실행되지 않음" >&2
+      echo "" >&2
+      echo "해결:" >&2
+      echo "  sudo systemctl start docker" >&2
+      echo "" >&2
+      exit 1
+    fi
+
+    # docker 그룹 확인
+    if ! groups | grep -q '\bdocker\b'; then
+      echo "원인: docker 그룹 미설정" >&2
+      echo "" >&2
+      echo "해결 (관리자에게 요청):" >&2
+      echo "  sudo usermod -aG docker $USER" >&2
+      echo "  newgrp docker  # 즉시 적용" >&2
+      echo "" >&2
+      echo "또는 sudo 비밀번호 입력 후 빌드:" >&2
+      echo "  sudo docker info  # 비밀번호 입력" >&2
+      echo "  ./build.sh        # 재실행" >&2
+    else
+      echo "원인: docker 그룹 설정되었으나 미적용" >&2
+      echo "" >&2
+      echo "해결:" >&2
+      echo "  newgrp docker  # 현재 터미널에 적용" >&2
+      echo "  ./build.sh     # 재실행" >&2
+    fi
+    echo "" >&2
+    exit 1
+  fi
 fi
 
 # ---------------------------- Ensure image ----------------------------------
@@ -65,7 +107,7 @@ fi
 # 다만 REFRESH_*_BUST 가 하나라도 들어오면 이미지 재빌드가 필요할 수 있음.
 
 NEED_IMAGE_BUILD=0
-if ! sudo docker image inspect "$IMAGE" >/dev/null 2>&1; then
+if ! $DOCKER_CMD image inspect "$IMAGE" >/dev/null 2>&1; then
   NEED_IMAGE_BUILD=1
   log "이미지($IMAGE) 없음"
 fi
@@ -89,7 +131,7 @@ else
   (
     cd "$DOCKERFILE_DIR"
 
-    BUILD_CMD=(sudo docker buildx build \
+    BUILD_CMD=($DOCKER_CMD buildx build \
       --platform "$PLATFORM" \
       -t "$IMAGE" \
       --load \
@@ -173,7 +215,7 @@ fi
 
 if [ "$VERBOSE" = "1" ]; then
   log "===== Docker run command ====="
-  log "sudo docker run --rm -t \\"
+  log "$DOCKER_CMD run --rm -t \\"
   log "  -v \"$SRC_DIR\":/work/src \\"
   log "  -v \"$OUT_DIR\":/work/out \\"
   log "  -v \"$CCACHE_DIR_HOST\":/work/.ccache \\"
@@ -186,7 +228,7 @@ if [ "$VERBOSE" = "1" ]; then
   log "=============================="
 fi
 
-"${TIME_PREFIX[@]}" sudo docker run --rm -t \
+"${TIME_PREFIX[@]}" $DOCKER_CMD run --rm -t \
   -v "$SRC_DIR":/work/src \
   -v "$OUT_DIR":/work/out \
   -v "$CCACHE_DIR_HOST":/work/.ccache \
