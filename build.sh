@@ -652,8 +652,12 @@ if [ "$VERBOSE" = "1" ]; then
   echo "[INFO]   REFRESH_GCC_BUST=$REFRESH_GCC_BUST"
 fi
 
-# 빌드 실행
+# 빌드 실행 (로그를 build.log에 저장)
 BUILD_EXIT_CODE=0
+BUILD_LOG="build.log"
+
+echo "[INFO] 빌드 로그를 $BUILD_LOG 에 저장합니다."
+
 if [[ -x "$TIMEBIN" ]]; then
   "$TIMEBIN" -v env \
     SRC_DIR="$SRC_DIR" OUT_DIR="$OUT_DIR" \
@@ -664,7 +668,8 @@ if [[ -x "$TIMEBIN" ]]; then
     REFRESH_SDK_BUST="$REFRESH_SDK_BUST" \
     REFRESH_CMAKE_BUST="$REFRESH_CMAKE_BUST" \
     REFRESH_GCC_BUST="$REFRESH_GCC_BUST" \
-    "$W55BUILD" || BUILD_EXIT_CODE=$?
+    "$W55BUILD" 2>&1 | tee "$BUILD_LOG"
+  BUILD_EXIT_CODE=${PIPESTATUS[0]}
 else
   if [ "$VERBOSE" = "1" ]; then
     echo "[WARN] /usr/bin/time 이 없습니다. (sudo apt-get install -y time)" >&2
@@ -678,7 +683,8 @@ else
     REFRESH_SDK_BUST="$REFRESH_SDK_BUST" \
     REFRESH_CMAKE_BUST="$REFRESH_CMAKE_BUST" \
     REFRESH_GCC_BUST="$REFRESH_GCC_BUST" \
-    "$W55BUILD" || BUILD_EXIT_CODE=$?
+    "$W55BUILD" 2>&1 | tee "$BUILD_LOG"
+  BUILD_EXIT_CODE=${PIPESTATUS[0]}
 fi
 
 # ---- 빌드 후 처리 -----------------------------------------------------------
