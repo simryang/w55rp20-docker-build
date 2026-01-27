@@ -1,4 +1,5 @@
 OLDS/
 build.config
 out/
-build.log
+*.log
+.claude/
