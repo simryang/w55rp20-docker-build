@@ -1,0 +1,111 @@
+# escape=`
+# Windows Container Dockerfile for W55RP20 Build Environment
+# Requires: Docker Desktop with Windows containers enabled
+
+FROM mcr.microsoft.com/windows/nanoserver:ltsc2022
+
+# Use PowerShell as the shell
+SHELL ["powershell", "-Command", "$ErrorActionPreference = 'Stop'; $ProgressPreference = 'SilentlyContinue';"]
+
+# ===== Version Pins =====
+ARG ARM_GNU_VERSION=14.2.rel1
+ARG CMAKE_VERSION=3.31.2
+ARG NINJA_VERSION=1.13.1
+ARG PICO_SDK_REF=2.2.0
+
+# ===== Working directory =====
+WORKDIR C:\opt
+
+# ===== Install Git =====
+# Git for Windows portable version
+RUN Write-Host 'Downloading Git for Windows...'; `
+    [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12; `
+    Invoke-WebRequest -Uri 'https://github.com/git-for-windows/git/releases/download/v2.48.0.windows.1/MinGit-2.48.0-64-bit.zip' -OutFile 'C:\git.zip'; `
+    Write-Host 'Extracting Git...'; `
+    Expand-Archive -Path 'C:\git.zip' -DestinationPath 'C:\git'; `
+    Remove-Item 'C:\git.zip'; `
+    Write-Host 'Git installed'
+
+# Add Git to PATH
+RUN $env:PATH = 'C:\git\cmd;C:\git\mingw64\bin;' + $env:PATH; `
+    [Environment]::SetEnvironmentVariable('PATH', $env:PATH, [EnvironmentVariableTarget]::Machine)
+
+# ===== Install Python =====
+# Python embedded distribution (no installer needed)
+RUN Write-Host 'Downloading Python...'; `
+    Invoke-WebRequest -Uri 'https://www.python.org/ftp/python/3.12.8/python-3.12.8-embed-amd64.zip' -OutFile 'C:\python.zip'; `
+    Write-Host 'Extracting Python...'; `
+    Expand-Archive -Path 'C:\python.zip' -DestinationPath 'C:\Python'; `
+    Remove-Item 'C:\python.zip'; `
+    Write-Host 'Python installed'
+
+# Add Python to PATH
+RUN $env:PATH = 'C:\Python;' + $env:PATH; `
+    [Environment]::SetEnvironmentVariable('PATH', $env:PATH, [EnvironmentVariableTarget]::Machine)
+
+# ===== Install CMake =====
+RUN Write-Host 'Downloading CMake...'; `
+    $cmakeUrl = 'https://github.com/Kitware/CMake/releases/download/v3.31.2/cmake-3.31.2-windows-x86_64.zip'; `
+    Invoke-WebRequest -Uri $cmakeUrl -OutFile 'C:\cmake.zip'; `
+    Write-Host 'Extracting CMake...'; `
+    Expand-Archive -Path 'C:\cmake.zip' -DestinationPath 'C:\'; `
+    Move-Item 'C:\cmake-3.31.2-windows-x86_64' 'C:\cmake'; `
+    Remove-Item 'C:\cmake.zip'; `
+    Write-Host 'CMake installed'
+
+# Add CMake to PATH
+RUN $env:PATH = 'C:\cmake\bin;' + $env:PATH; `
+    [Environment]::SetEnvironmentVariable('PATH', $env:PATH, [EnvironmentVariableTarget]::Machine)
+
+# ===== Install Ninja =====
+RUN Write-Host 'Downloading Ninja...'; `
+    Invoke-WebRequest -Uri 'https://github.com/ninja-build/ninja/releases/download/v1.13.1/ninja-win.zip' -OutFile 'C:\ninja.zip'; `
+    Write-Host 'Extracting Ninja...'; `
+    Expand-Archive -Path 'C:\ninja.zip' -DestinationPath 'C:\ninja'; `
+    Remove-Item 'C:\ninja.zip'; `
+    Write-Host 'Ninja installed'
+
+# Add Ninja to PATH
+RUN $env:PATH = 'C:\ninja;' + $env:PATH; `
+    [Environment]::SetEnvironmentVariable('PATH', $env:PATH, [EnvironmentVariableTarget]::Machine)
+
+# ===== Install ARM GCC Toolchain =====
+RUN Write-Host 'Downloading ARM GCC Toolchain...'; `
+    $gccUrl = 'https://developer.arm.com/-/media/Files/downloads/gnu/14.2.rel1/binrel/arm-gnu-toolchain-14.2.rel1-mingw-w64-i686-arm-none-eabi.zip'; `
+    Invoke-WebRequest -Uri $gccUrl -OutFile 'C:\armgcc.zip'; `
+    Write-Host 'Extracting ARM GCC (this may take a while)...'; `
+    Expand-Archive -Path 'C:\armgcc.zip' -DestinationPath 'C:\'; `
+    Move-Item 'C:\arm-gnu-toolchain-14.2.Rel1-mingw-w64-i686-arm-none-eabi' 'C:\toolchain'; `
+    Remove-Item 'C:\armgcc.zip'; `
+    Write-Host 'ARM GCC installed'
+
+# Add ARM GCC to PATH
+RUN $env:PATH = 'C:\toolchain\bin;' + $env:PATH; `
+    [Environment]::SetEnvironmentVariable('PATH', $env:PATH, [EnvironmentVariableTarget]::Machine)
+
+# ===== Clone Pico SDK =====
+RUN Write-Host 'Cloning Pico SDK...'; `
+    git clone --depth 1 --branch 2.2.0 https://github.com/raspberrypi/pico-sdk.git C:\pico-sdk; `
+    Set-Location C:\pico-sdk; `
+    git submodule update --init --recursive; `
+    Write-Host 'Pico SDK cloned'
+
+# Set PICO_SDK_PATH
+ENV PICO_SDK_PATH=C:\pico-sdk
+ENV PICO_TOOLCHAIN_PATH=C:\toolchain
+
+# ===== Verification =====
+RUN Write-Host 'Verifying installations...'; `
+    Write-Host ('Git: ' + (git --version)); `
+    Write-Host ('Python: ' + (python --version)); `
+    Write-Host ('CMake: ' + (cmake --version).Split("`n")[0]); `
+    Write-Host ('Ninja: ' + (ninja --version)); `
+    Write-Host ('ARM GCC: ' + (arm-none-eabi-gcc --version).Split("`n")[0]); `
+    Write-Host 'All tools verified!'
+
+# ===== Build script =====
+COPY docker-build-windows.ps1 C:\build.ps1
+
+WORKDIR C:\work
+
+ENTRYPOINT ["powershell", "-File", "C:\\build.ps1"]
