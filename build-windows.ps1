@@ -241,26 +241,47 @@ $imageExists = docker image inspect $IMAGE 2>&1 | Out-Null
 $imageNeedsRebuild = $LASTEXITCODE -ne 0
 
 if ($imageNeedsRebuild) {
-    Write-Info "Docker 이미지 빌드 중... (최초 1회, 약 20분 소요)"
+    Write-Info "로컬 이미지($IMAGE) 없음"
     Write-Host ""
 
-    Push-Location $SCRIPT_DIR
+    # DockerHub에서 이미지 다운로드 시도
+    $DOCKERHUB_IMAGE = "simryang/w55rp20:linux"
 
-    docker buildx build `
-        --platform linux/amd64 `
-        -t $IMAGE `
-        --load `
-        --progress=plain `
-        -f Dockerfile .
+    Write-Info "DockerHub에서 이미지 다운로드 중... (최초 1회, 약 5분)"
+    Write-Host "  이미지: $DOCKERHUB_IMAGE" -ForegroundColor Cyan
+    Write-Host ""
 
-    if ($LASTEXITCODE -ne 0) {
-        Write-Error-Custom "Docker 이미지 빌드 실패"
+    docker pull $DOCKERHUB_IMAGE 2>&1 | Out-Null
+
+    if ($LASTEXITCODE -eq 0) {
+        # Pull 성공 - 로컬 태그로 재태깅
+        Write-Success "이미지 다운로드 완료"
+        docker tag $DOCKERHUB_IMAGE $IMAGE
+        Write-Info "이미지 준비 완료: $IMAGE"
+    } else {
+        # Pull 실패 - 로컬 빌드
+        Write-Warn "DockerHub 다운로드 실패, 로컬 빌드 시작..."
+        Write-Info "Docker 이미지 빌드 중... (최초 1회, 약 20분 소요)"
+        Write-Host ""
+
+        Push-Location $SCRIPT_DIR
+
+        docker buildx build `
+            --platform linux/amd64 `
+            -t $IMAGE `
+            --load `
+            --progress=plain `
+            -f Dockerfile .
+
+        if ($LASTEXITCODE -ne 0) {
+            Write-Error-Custom "Docker 이미지 빌드 실패"
+            Pop-Location
+            exit 1
+        }
+
         Pop-Location
-        exit 1
+        Write-Success "이미지 빌드 완료"
     }
-
-    Pop-Location
-    Write-Success "이미지 빌드 완료"
 } else {
     Write-Success "이미지 존재 (재사용)"
 }

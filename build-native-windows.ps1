@@ -251,6 +251,17 @@ $imageExists = docker image inspect $IMAGE 2>&1 | Out-Null
 $imageNeedsRebuild = $LASTEXITCODE -ne 0
 
 if ($imageNeedsRebuild) {
+    Write-Info "로컬 이미지($IMAGE) 없음"
+    Write-Host ""
+
+    # TODO: DockerHub에서 Windows 이미지 다운로드 (향후 지원)
+    # $DOCKERHUB_IMAGE = "simryang/w55rp20:windows"
+    # docker pull $DOCKERHUB_IMAGE
+    # if ($LASTEXITCODE -eq 0) {
+    #     docker tag $DOCKERHUB_IMAGE $IMAGE
+    # }
+
+    # 현재: Windows 이미지는 로컬 빌드 필요
     Write-Info "Windows 컨테이너 이미지 빌드 중..."
     Write-Warning-Custom "최초 1회, 약 30-40분 소요 (대용량 다운로드)"
     Write-Host ""

@@ -49,6 +49,62 @@ ls -l ./out/
 
 ---
 
+## Windows 빠른 시작 ⭐ NEW!
+
+**All-in-One 솔루션**: Linux 컨테이너 + Windows 컨테이너 모두 지원
+
+### 준비물
+- Windows 10/11 64-bit
+- [Docker Desktop](https://www.docker.com/products/docker-desktop) 설치 및 실행 중
+- [Git for Windows](https://git-scm.com/download/win) 설치
+
+### 실행 (이미지 자동 다운로드! 빌드 불필요!)
+
+```powershell
+# 1. 저장소 클론
+git clone https://github.com/simryang/w55rp20-docker-build.git
+cd w55rp20-docker-build
+
+# 2. 대화형 모드 실행 (초보자 권장)
+.\build.ps1 -Interactive
+# → 메뉴에서 [1] Linux 컨테이너 선택
+# → 이미지 자동 다운로드 (DockerHub에서, 최초 1회 약 5분)
+# → 빌드 자동 실행 (약 50초 → ccache 후 12초)
+
+# 또는 자동 모드 (빠른 빌드)
+.\build.ps1
+# → Docker 현재 모드 자동 감지 및 빌드
+
+# 3. 산출물 확인
+ls .\out\*.uf2
+```
+
+**시간 절약**: DockerHub 이미지 사용으로 **20분 → 5분**으로 단축! 🚀
+
+### 특징
+
+✅ **두 가지 컨테이너 옵션**
+- **Linux 컨테이너** (권장): WSL2 기반, 크로스 플랫폼, CI/CD 완벽 호환
+- **Windows 컨테이너**: WSL2 불필요, 네이티브 성능 (Windows 전용)
+
+✅ **완벽한 UX**
+- 대화형 모드: 장단점, 시간, 용량 정보 제공
+- 자동 모드: 빠른 빌드
+- 명시적 제어: `-Linux` 또는 `-Windows` 플래그
+
+✅ **DockerHub 이미지**
+- 사전 빌드된 이미지 제공 (simryang/w55rp20:linux)
+- 20분 이미지 빌드 불필요
+- 5분 다운로드 후 바로 사용
+
+### 상세 문서
+
+- **[WINDOWS_ALL_IN_ONE.md](docs/WINDOWS_ALL_IN_ONE.md)** - 완벽 가이드
+- **[INTERACTIVE_MODE_DEMO.md](docs/INTERACTIVE_MODE_DEMO.md)** - 실제 화면 시연
+- **[WINDOWS_CONTAINER_COMPARISON.md](docs/WINDOWS_CONTAINER_COMPARISON.md)** - 상세 비교
+
+---
+
 ## 요구사항
 
 - **Docker** (필수)
