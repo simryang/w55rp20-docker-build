@@ -3,3 +3,4 @@ build.config
 out/
 *.log
 .claude/
+*.zip

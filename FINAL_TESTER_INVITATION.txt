@@ -1,0 +1,98 @@
+제목: W55RP20 Windows 빌드 시스템 테스트 요청
+
+안녕하세요,
+
+W55RP20 펌웨어의 Windows 빌드 시스템을 개발했습니다.
+GitHub + DockerHub 기반으로 매우 간단하게 테스트할 수 있습니다.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+📦 저장소:
+https://github.com/simryang/w55rp20-docker-build
+
+🚀 빠른 시작 (3분):
+
+1. Git Bash 또는 PowerShell에서:
+   git clone https://github.com/simryang/w55rp20-docker-build.git
+   cd w55rp20-docker-build
+
+2. 대화형 모드 실행:
+   .\build.ps1 -Interactive
+
+3. 메뉴에서 [1] Linux 컨테이너 선택
+   → 이미지 자동 다운로드 (DockerHub, 최초 1회 약 5분)
+   → 빌드 자동 실행 (약 50초 → ccache 후 12초)
+
+4. 산출물 확인:
+   ls .\out\*.uf2
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+✅ 장점:
+  • 20분 이미지 빌드 불필요! (DockerHub 자동 다운로드)
+  • git clone 후 바로 실행 가능
+  • GitHub Issues로 쉽게 피드백 제출
+  • All-in-One 솔루션 (Linux + Windows 컨테이너)
+
+🔧 시스템 요구사항:
+  • Windows 10/11 64-bit
+  • 8GB+ RAM (16GB 권장)
+  • 20GB 여유 디스크
+  • Git for Windows 설치됨
+  • Docker Desktop 설치 및 실행 중
+
+📖 상세 가이드:
+  • 완벽 가이드: https://github.com/simryang/w55rp20-docker-build/blob/master/WINDOWS_TESTING_GUIDE.md
+  • 빠른 체크리스트: https://github.com/simryang/w55rp20-docker-build/blob/master/TESTING_CHECKLIST.md
+
+🎯 핵심 테스트 (필수):
+  1. 대화형 모드 (.\build.ps1 -Interactive)
+  2. 자동 모드 (.\build.ps1)
+  3. 모드 불일치 처리 확인
+
+💬 피드백 제출:
+GitHub Issues로 제출:
+https://github.com/simryang/w55rp20-docker-build/issues
+
+또는 WINDOWS_TESTING_GUIDE.md의 피드백 양식 복사하여 이메일
+
+⏱️ 예상 시간:
+  • 환경 준비: 30분 (Docker Desktop 설치)
+  • 최초 실행: 5분 (이미지 다운로드) + 50초 (빌드)
+  • 핵심 테스ト: 1-2시간
+  • 이후 빌드: 12초 (ccache)
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+🎉 특징:
+
+All-in-One 솔루션:
+  • Linux 컨테이너 (WSL2 기반, 크로스 플랫폼, CI/CD 완벽 호환)
+  • Windows 컨테이너 (네이티브, WSL2 불필요)
+  • 사용자 선택 가능
+
+완벽한 UX:
+  • 대화형 모드 (초보자용, 장단점/시간/용량 정보 제공)
+  • 자동 모드 (일반 사용자, 빠른 빌드)
+  • 명시적 제어 (전문가용)
+
+시간 절약:
+  • DockerHub 이미지 제공 (simryang/w55rp20:linux)
+  • 20분 빌드 → 5분 다운로드로 단축!
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+💡 참고:
+  • Windows 컨테이너 테스트는 선택사항 (30-40분 소요)
+  • Git Bash 테스트는 선택사항
+  • 핵심 테스트 3개만 완료해도 충분합니다!
+
+🙏 테스트에 참여해주셔서 감사합니다!
+여러분의 피드백이 프로젝트의 품질을 크게 향상시킬 것입니다.
+
+감사합니다!
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+DockerHub: https://hub.docker.com/r/simryang/w55rp20
+GitHub: https://github.com/simryang/w55rp20-docker-build
