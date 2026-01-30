@@ -247,8 +247,12 @@ if ($Clean) {
 
 Write-Info "Docker 이미지 확인 중..."
 
+# 이미지 존재 확인 (에러 무시)
+$savedErrorPreference = $ErrorActionPreference
+$ErrorActionPreference = "Continue"
 $null = docker image inspect $IMAGE 2>&1
 $imageNeedsRebuild = $LASTEXITCODE -ne 0
+$ErrorActionPreference = $savedErrorPreference
 
 if ($imageNeedsRebuild) {
     Write-Info "로컬 이미지($IMAGE) 없음"
@@ -256,8 +260,11 @@ if ($imageNeedsRebuild) {
 
     # TODO: DockerHub에서 Windows 이미지 다운로드 (향후 지원)
     # $DOCKERHUB_IMAGE = "simryang/w55rp20:windows"
+    # $ErrorActionPreference = "Continue"
     # docker pull $DOCKERHUB_IMAGE
-    # if ($LASTEXITCODE -eq 0) {
+    # $pullExitCode = $LASTEXITCODE
+    # $ErrorActionPreference = $savedErrorPreference
+    # if ($pullExitCode -eq 0) {
     #     docker tag $DOCKERHUB_IMAGE $IMAGE
     # }
 

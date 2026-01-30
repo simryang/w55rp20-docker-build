@@ -237,8 +237,12 @@ if ($Clean) {
 
 Write-Info "Docker 이미지 확인 중..."
 
+# 이미지 존재 확인 (에러 무시)
+$savedErrorPreference = $ErrorActionPreference
+$ErrorActionPreference = "Continue"
 $null = docker image inspect $IMAGE 2>&1
 $imageNeedsRebuild = $LASTEXITCODE -ne 0
+$ErrorActionPreference = $savedErrorPreference
 
 if ($imageNeedsRebuild) {
     Write-Info "로컬 이미지($IMAGE) 없음"
@@ -251,16 +255,20 @@ if ($imageNeedsRebuild) {
     Write-Host "  이미지: $DOCKERHUB_IMAGE" -ForegroundColor Cyan
     Write-Host ""
 
+    # Pull 시도 (에러 허용)
+    $ErrorActionPreference = "Continue"
     docker pull $DOCKERHUB_IMAGE
+    $pullExitCode = $LASTEXITCODE
+    $ErrorActionPreference = $savedErrorPreference
 
-    if ($LASTEXITCODE -eq 0) {
+    if ($pullExitCode -eq 0) {
         # Pull 성공 - 로컬 태그로 재태깅
         Write-Success "이미지 다운로드 완료"
         docker tag $DOCKERHUB_IMAGE $IMAGE
         Write-Info "이미지 준비 완료: $IMAGE"
     } else {
         # Pull 실패 - 로컬 빌드
-        Write-Warn "DockerHub 다운로드 실패, 로컬 빌드 시작..."
+        Write-Warning "DockerHub 다운로드 실패, 로컬 빌드 시작..."
         Write-Info "Docker 이미지 빌드 중... (최초 1회, 약 20분 소요)"
         Write-Host ""
 
