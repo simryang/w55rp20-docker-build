@@ -1,4 +1,4 @@
-# build-native-windows.ps1
+﻿# build-native-windows.ps1
 # Windows Native Container 빌드 스크립트 (WSL2 불필요!)
 
 param(
@@ -50,14 +50,14 @@ SETUP (최초 1회):
   4. 이 스크립트 실행
 
 ADVANTAGES:
-  ✅ WSL2 불필요
-  ✅ Linux VM 없음
-  ✅ Windows 네이티브 성능
-  ✅ 직접 .exe 실행
+  [O] WSL2 불필요
+  [O] Linux VM 없음
+  [O] Windows 네이티브 성능
+  [O] 직접 .exe 실행
 
 DISADVANTAGES:
-  ❌ 이미지 크기 큼 (약 2GB)
-  ❌ 첫 빌드 느림 (다운로드 시간)
+  [X] 이미지 크기 큼 (약 2GB)
+  [X] 첫 빌드 느림 (다운로드 시간)
 
 EXAMPLES:
   # 기본 빌드
@@ -163,7 +163,7 @@ Write-Success "Docker Desktop (Windows containers mode) 실행 중"
 # 설정
 # ============================================================================
 
-$IMAGE = "w55rp20-windows:auto"
+$IMAGE = "w55rp20-windows:latest"
 
 $SCRIPT_DIR = Split-Path -Parent $MyInvocation.MyCommand.Path
 $DEFAULT_SRC = "$env:USERPROFILE\W55RP20-S2E"

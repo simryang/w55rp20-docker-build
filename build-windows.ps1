@@ -1,4 +1,4 @@
-# build-windows.ps1 - Windows PowerShell용 W55RP20 빌드 스크립트
+﻿# build-windows.ps1 - Windows PowerShell용 W55RP20 빌드 스크립트
 # Docker Desktop for Windows 전용
 
 param(
@@ -137,7 +137,7 @@ Write-Success "Docker Desktop 실행 중"
 # 설정
 # ============================================================================
 
-$IMAGE = "w55rp20:auto"
+$IMAGE = "w55rp20:latest"
 $TMPFS_SIZE = "20g"
 
 # 기본 디렉토리
@@ -245,7 +245,7 @@ if ($imageNeedsRebuild) {
     Write-Host ""
 
     # DockerHub에서 이미지 다운로드 시도
-    $DOCKERHUB_IMAGE = "simryang/w55rp20:linux"
+    $DOCKERHUB_IMAGE = "simryang/w55rp20:latest"
 
     Write-Info "DockerHub에서 이미지 다운로드 중... (최초 1회, 약 5분)"
     Write-Host "  이미지: $DOCKERHUB_IMAGE" -ForegroundColor Cyan

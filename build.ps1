@@ -1,4 +1,4 @@
-# build.ps1 - W55RP20 통합 빌드 시스템 (All-in-One)
+﻿﻿# build.ps1 - W55RP20 통합 빌드 시스템 (All-in-One)
 # Linux 컨테이너 + Windows 컨테이너 자동 선택 또는 사용자 지정
 
 param(
@@ -131,41 +131,41 @@ function Show-InteractiveMenu {
     Write-Host "  [1] Linux 컨테이너 (크로스 플랫폼)" -ForegroundColor Green
     Write-Host ""
     Write-Host "      장점:" -ForegroundColor Cyan
-    Write-Host "        ✅ Linux/macOS/Windows 모두 사용 가능" -ForegroundColor White
-    Write-Host "        ✅ 팀 개발 최적 (환경 통일)" -ForegroundColor White
-    Write-Host "        ✅ CI/CD 완벽 호환 (GitHub Actions 등)" -ForegroundColor White
-    Write-Host "        ✅ 표준적 (전 세계 Docker의 99%)" -ForegroundColor White
+    Write-Host "        [O] Linux/macOS/Windows 모두 사용 가능" -ForegroundColor White
+    Write-Host "        [O] 팀 개발 최적 (환경 통일)" -ForegroundColor White
+    Write-Host "        [O] CI/CD 완벽 호환 (GitHub Actions 등)" -ForegroundColor White
+    Write-Host "        [O] 표준적 (전 세계 Docker의 99%)" -ForegroundColor White
     Write-Host ""
     Write-Host "      단점:" -ForegroundColor Cyan
-    Write-Host "        ⚠️  WSL2 필요 (Docker Desktop이 자동 설치)" -ForegroundColor White
-    Write-Host "        ⚠️  약간의 성능 오버헤드 (6%, 실용적 수준)" -ForegroundColor White
+    Write-Host "        [!]  WSL2 필요 (Docker Desktop이 자동 설치)" -ForegroundColor White
+    Write-Host "        [!]  약간의 성능 오버헤드 (6%, 실용적 수준)" -ForegroundColor White
     Write-Host ""
     Write-Host "      시간/용량:" -ForegroundColor Cyan
-    Write-Host "        ⏱️  최초 빌드: 약 20분 (이미지 생성)" -ForegroundColor White
-    Write-Host "        ⏱️  이후 빌드: 약 50초 → 12초 (ccache)" -ForegroundColor White
-    Write-Host "        💾 이미지 크기: 2GB" -ForegroundColor White
-    Write-Host "        💾 디스크 여유: 5GB 권장" -ForegroundColor White
+    Write-Host "        [T]  최초 빌드: 약 20분 (이미지 생성)" -ForegroundColor White
+    Write-Host "        [T]  이후 빌드: 약 50초 → 12초 (ccache)" -ForegroundColor White
+    Write-Host "        [D] 이미지 크기: 2GB" -ForegroundColor White
+    Write-Host "        [D] 디스크 여유: 5GB 권장" -ForegroundColor White
     Write-Host ""
 
     # 옵션 2: Windows 컨테이너
     Write-Host "  [2] Windows 컨테이너 (네이티브)" -ForegroundColor Green
     Write-Host ""
     Write-Host "      장점:" -ForegroundColor Cyan
-    Write-Host "        ✅ WSL2 불필요!" -ForegroundColor White
-    Write-Host "        ✅ Windows 네이티브 성능 (오버헤드 0%)" -ForegroundColor White
-    Write-Host "        ✅ .exe 직접 실행" -ForegroundColor White
-    Write-Host "        ✅ Hyper-V 격리 (보안)" -ForegroundColor White
+    Write-Host "        [O] WSL2 불필요!" -ForegroundColor White
+    Write-Host "        [O] Windows 네이티브 성능 (오버헤드 0%)" -ForegroundColor White
+    Write-Host "        [O] .exe 직접 실행" -ForegroundColor White
+    Write-Host "        [O] Hyper-V 격리 (보안)" -ForegroundColor White
     Write-Host ""
     Write-Host "      단점:" -ForegroundColor Cyan
-    Write-Host "        ⚠️  Windows 전용 (Linux/macOS 불가)" -ForegroundColor White
-    Write-Host "        ⚠️  CI/CD 제한적 (Windows runner 비용)" -ForegroundColor White
-    Write-Host "        ⚠️  Docker 모드 전환 필요" -ForegroundColor White
+    Write-Host "        [!]  Windows 전용 (Linux/macOS 불가)" -ForegroundColor White
+    Write-Host "        [!]  CI/CD 제한적 (Windows runner 비용)" -ForegroundColor White
+    Write-Host "        [!]  Docker 모드 전환 필요" -ForegroundColor White
     Write-Host ""
     Write-Host "      시간/용량:" -ForegroundColor Cyan
-    Write-Host "        ⏱️  최초 빌드: 약 30-40분 (대용량 다운로드)" -ForegroundColor White
-    Write-Host "        ⏱️  이후 빌드: 약 47초 → 11초 (ccache)" -ForegroundColor White
-    Write-Host "        💾 이미지 크기: 2.5GB" -ForegroundColor White
-    Write-Host "        💾 디스크 여유: 6GB 권장" -ForegroundColor White
+    Write-Host "        [T]  최초 빌드: 약 30-40분 (대용량 다운로드)" -ForegroundColor White
+    Write-Host "        [T]  이후 빌드: 약 47초 → 11초 (ccache)" -ForegroundColor White
+    Write-Host "        [D] 이미지 크기: 2.5GB" -ForegroundColor White
+    Write-Host "        [D] 디스크 여유: 6GB 권장" -ForegroundColor White
     Write-Host ""
 
     # 옵션 3: 자동
@@ -179,9 +179,9 @@ function Show-InteractiveMenu {
 
     # 추천 표시
     if ($CurrentMode -eq "linux") {
-        Write-Host "💡 추천: [1] Linux 컨테이너 (현재 모드와 일치)" -ForegroundColor Cyan
+        Write-Host "[i] 추천: [1] Linux 컨테이너 (현재 모드와 일치)" -ForegroundColor Cyan
     } elseif ($CurrentMode -eq "windows") {
-        Write-Host "💡 추천: [2] Windows 컨테이너 (현재 모드와 일치)" -ForegroundColor Cyan
+        Write-Host "[i] 추천: [2] Windows 컨테이너 (현재 모드와 일치)" -ForegroundColor Cyan
     }
 
     Write-Host ""
@@ -203,17 +203,17 @@ function Show-CompletionMessage {
 
     Write-Host ""
     Write-Host "╔══════════════════════════════════════════════════════════════╗" -ForegroundColor Green
-    Write-Host "║                  🎉 빌드 완료! 🎉                           ║" -ForegroundColor Green
+    Write-Host "║                   빌드 완료!                            ║" -ForegroundColor Green
     Write-Host "╚══════════════════════════════════════════════════════════════╝" -ForegroundColor Green
     Write-Host ""
 
     # 산출물 위치
-    Write-Host "📦 산출물 위치:" -ForegroundColor Cyan
+    Write-Host "[>] 산출물 위치:" -ForegroundColor Cyan
     Write-Host "   $OutputDir" -ForegroundColor White
     Write-Host ""
 
     # W55RP20에 업로드하는 방법
-    Write-Host "📌 W55RP20에 펌웨어 업로드하는 방법:" -ForegroundColor Cyan
+    Write-Host "[*] W55RP20에 펌웨어 업로드하는 방법:" -ForegroundColor Cyan
     Write-Host ""
     Write-Host "   1. W55RP20 보드의 BOOTSEL 버튼을 누른 채로 USB 연결" -ForegroundColor White
     Write-Host "   2. Windows가 'RPI-RP2' 드라이브로 인식" -ForegroundColor White
@@ -222,7 +222,7 @@ function Show-CompletionMessage {
     Write-Host ""
 
     # 다음 빌드 방법
-    Write-Host "🚀 다음 빌드 방법:" -ForegroundColor Cyan
+    Write-Host "[>] 다음 빌드 방법:" -ForegroundColor Cyan
     Write-Host ""
 
     if ($ContainerType -eq "linux") {
@@ -253,11 +253,11 @@ function Show-CompletionMessage {
     }
 
     Write-Host ""
-    Write-Host "💡 팁: 이후 빌드는 훨씬 빠릅니다! (이미지 재사용)" -ForegroundColor Cyan
+    Write-Host "[i] 팁: 이후 빌드는 훨씬 빠릅니다! (이미지 재사용)" -ForegroundColor Cyan
     Write-Host ""
 
     # 추가 도움말
-    Write-Host "📖 더 많은 정보:" -ForegroundColor Cyan
+    Write-Host "[?] 더 많은 정보:" -ForegroundColor Cyan
     Write-Host "   .\build.ps1 -Help" -ForegroundColor White
     Write-Host "   docs\WINDOWS_ALL_IN_ONE.md" -ForegroundColor White
     Write-Host ""
@@ -431,9 +431,9 @@ if ($containerType -eq "linux") {
     Write-Success "Linux 컨테이너 빌드 시작 (WSL2 기반)"
     Write-Host ""
     Write-Host "특징:" -ForegroundColor Cyan
-    Write-Host "  ✅ 크로스 플랫폼 (Linux/macOS/Windows)"
-    Write-Host "  ✅ CI/CD 완벽 호환"
-    Write-Host "  ✅ 표준 Docker 경험"
+    Write-Host "  [O] 크로스 플랫폼 (Linux/macOS/Windows)"
+    Write-Host "  [O] CI/CD 완벽 호환"
+    Write-Host "  [O] 표준 Docker 경험"
     Write-Host ""
 
     $scriptPath = Join-Path $SCRIPT_DIR "build-windows.ps1"
@@ -456,9 +456,9 @@ elseif ($containerType -eq "windows") {
     Write-Success "Windows 컨테이너 빌드 시작 (네이티브)"
     Write-Host ""
     Write-Host "특징:" -ForegroundColor Cyan
-    Write-Host "  ✅ WSL2 불필요"
-    Write-Host "  ✅ Windows 네이티브 성능"
-    Write-Host "  ✅ .exe 직접 실행"
+    Write-Host "  [O] WSL2 불필요"
+    Write-Host "  [O] Windows 네이티브 성능"
+    Write-Host "  [O] .exe 직접 실행"
     Write-Host ""
 
     $scriptPath = Join-Path $SCRIPT_DIR "build-native-windows.ps1"
