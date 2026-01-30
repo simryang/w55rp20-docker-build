@@ -1,4 +1,4 @@
-﻿﻿# build.ps1 - W55RP20 통합 빌드 시스템 (All-in-One)
+﻿# build.ps1 - W55RP20 통합 빌드 시스템 (All-in-One)
 # Linux 컨테이너 + Windows 컨테이너 자동 선택 또는 사용자 지정
 
 param(
