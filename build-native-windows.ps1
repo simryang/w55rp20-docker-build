@@ -247,7 +247,7 @@ if ($Clean) {
 
 Write-Info "Docker 이미지 확인 중..."
 
-$imageExists = docker image inspect $IMAGE 2>&1 | Out-Null
+$null = docker image inspect $IMAGE 2>&1
 $imageNeedsRebuild = $LASTEXITCODE -ne 0
 
 if ($imageNeedsRebuild) {

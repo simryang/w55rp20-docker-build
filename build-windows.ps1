@@ -237,7 +237,7 @@ if ($Clean) {
 
 Write-Info "Docker 이미지 확인 중..."
 
-$imageExists = docker image inspect $IMAGE 2>&1 | Out-Null
+$null = docker image inspect $IMAGE 2>&1
 $imageNeedsRebuild = $LASTEXITCODE -ne 0
 
 if ($imageNeedsRebuild) {
@@ -251,7 +251,7 @@ if ($imageNeedsRebuild) {
     Write-Host "  이미지: $DOCKERHUB_IMAGE" -ForegroundColor Cyan
     Write-Host ""
 
-    docker pull $DOCKERHUB_IMAGE 2>&1 | Out-Null
+    docker pull $DOCKERHUB_IMAGE
 
     if ($LASTEXITCODE -eq 0) {
         # Pull 성공 - 로컬 태그로 재태깅
